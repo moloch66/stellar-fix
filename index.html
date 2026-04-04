@@ -4,1523 +4,755 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stellar Fix</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#070912}
+:root{
+  --px:'Press Start 2P',monospace;
+  --mono:'Share Tech Mono',monospace;
+  --orb:'Orbitron',monospace;
+  --orange:#E8861A;--orange2:#FFB347;--orange3:#FF6B00;
+  --blue:#4A9EE8;--blue2:#7EC4FF;
+  --green:#39FF14;--green2:#4AE880;
+  --yellow:#FFE000;
+  --red:#FF3C3C;--red2:#FF6B6B;
+  --purple:#BF5FFF;
+  --dark:#070912;--dark2:#0f1120;
+  --panel:rgba(8,10,22,0.96);
+}
+canvas{image-rendering:pixelated}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px)}
+.screen{position:fixed;inset:0;display:none;z-index:10}
+.screen.active{display:flex}
 
-:root {
-  --bg:       #0B0F1A;
-  --bg2:      #111520;
-  --bg3:      #161C2E;
-  --panel:    #0D1225;
-  --border:   #1E2840;
-  --orange:   #E8861A;
-  --orange2:  #FFAA44;
-  --blue:     #4A9EE8;
-  --blue2:    #7EC4FF;
-  --green:    #4AE8A0;
-  --red:      #E84A4A;
-  --yellow:   #FFD966;
-  --text:     #C8D8F0;
-  --muted:    #4A5E7A;
-  --mono:     'Share Tech Mono', monospace;
-  --head:     'Orbitron', monospace;
-  --body:     'Exo 2', sans-serif;
-}
+/* BG */
+#bg{position:fixed;inset:0;z-index:1;width:100%;height:100%}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:9997}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ===== MENU ===== */
+#menu{flex-direction:column;align-items:center;justify-content:center;z-index:20}
+.menu-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,9,18,0.55) 0%,rgba(7,9,18,0.1) 45%,rgba(7,9,18,0.75) 100%)}
+.logo-sub{font-family:var(--mono);font-size:10px;letter-spacing:8px;color:rgba(232,134,26,0.65);margin-bottom:14px;text-transform:uppercase;position:relative;z-index:2}
+.logo-main{font-family:var(--orb);font-size:clamp(50px,9vw,94px);font-weight:900;letter-spacing:2px;color:#fff;text-shadow:0 0 30px rgba(232,134,26,0.9),0 0 70px rgba(232,134,26,0.4);position:relative;z-index:2;line-height:1}
+.logo-main span{color:var(--orange)}
+.logo-tag{font-family:var(--mono);font-size:11px;color:rgba(200,216,240,0.4);margin-top:12px;letter-spacing:1.5px;position:relative;z-index:2;margin-bottom:44px}
+.menu-btns{display:flex;flex-direction:column;gap:10px;align-items:center;position:relative;z-index:2}
+.btn-px{font-family:var(--px);font-size:8px;letter-spacing:1px;padding:13px 44px;cursor:pointer;border:none;outline:none;text-transform:uppercase;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:all 0.14s;min-width:250px;text-align:center}
+.btn-px.primary{background:linear-gradient(180deg,#c06800,#7a3c00);color:#FFE4A0;box-shadow:0 0 0 2px #E8861A,0 0 18px rgba(232,134,26,0.35),inset 0 1px 0 rgba(255,190,80,0.25)}
+.btn-px.primary:hover{background:linear-gradient(180deg,#E8861A,#9a4800);box-shadow:0 0 0 2px #FFB347,0 0 32px rgba(232,134,26,0.6);transform:translateY(-2px)}
+.btn-px.secondary{background:linear-gradient(180deg,#181e38,#0d1226);color:rgba(200,216,240,0.6);box-shadow:0 0 0 1px rgba(74,158,232,0.25)}
+.btn-px.secondary:hover{color:var(--blue2);box-shadow:0 0 0 1px var(--blue),0 0 18px rgba(74,158,232,0.25);transform:translateY(-2px)}
+.btn-px:active{transform:translateY(1px)!important}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--body);
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
-  cursor: default;
-  user-select: none;
-}
+/* ===== GAME ===== */
+#game{flex-direction:column;z-index:20}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:44px;flex-shrink:0;position:relative;z-index:30;background:linear-gradient(180deg,rgba(6,8,18,0.99),rgba(9,12,24,0.97));border-bottom:2px solid var(--orange3);box-shadow:0 2px 18px rgba(232,134,26,0.28)}
+.tb-left{display:flex;align-items:center;gap:14px}
+.tb-logo{font-family:var(--px);font-size:7px;color:#fff;letter-spacing:1px}
+.tb-logo span{color:var(--orange)}
+.tb-day{font-family:var(--mono);font-size:10px;color:rgba(200,216,240,0.4);letter-spacing:2px}
+.tb-cr{font-family:var(--px);font-size:7px;color:var(--yellow);display:flex;align-items:center;gap:5px;background:rgba(255,224,0,0.07);border:1px solid rgba(255,224,0,0.18);padding:4px 10px;border-radius:1px}
 
-canvas#stars {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
+.game-body{display:flex;flex:1;overflow:hidden;position:relative}
 
-.screen {
-  position: absolute;
-  inset: 0;
-  display: none;
-  z-index: 10;
+/* ===== LEFT MENU (pixel art panel style) ===== */
+.side-menu{
+  width:78px;flex-shrink:0;position:relative;z-index:30;
+  background:linear-gradient(180deg,rgba(6,8,20,0.98),rgba(10,13,28,0.97));
+  border-right:3px solid var(--orange3);
+  box-shadow:4px 0 18px rgba(232,134,26,0.18),inset -1px 0 0 rgba(232,134,26,0.08);
+  display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:5px;
 }
-.screen.active { display: flex; }
+.sm-label{font-family:var(--px);font-size:4.5px;color:rgba(232,134,26,0.35);letter-spacing:1px;text-transform:uppercase;text-align:center;margin:3px 0 1px;line-height:1.5}
+.sm-sep{width:50px;height:1px;background:linear-gradient(90deg,transparent,rgba(74,158,232,0.25),transparent);margin:2px 0}
 
-/* ===================== MENU ===================== */
-#menu-screen {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+.tool-btn{
+  width:58px;height:58px;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border:2px solid rgba(74,158,232,0.18);
+  background:linear-gradient(180deg,rgba(18,24,48,0.92),rgba(10,14,32,0.96));
+  border-radius:2px;transition:all 0.12s;
+  box-shadow:inset 0 1px 0 rgba(74,158,232,0.08),0 2px 10px rgba(0,0,0,0.6);
 }
+.tool-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.035),transparent);pointer-events:none}
+.tool-btn:hover{border-color:var(--orange);background:linear-gradient(180deg,rgba(232,134,26,0.14),rgba(90,40,0,0.18));box-shadow:0 0 14px rgba(232,134,26,0.35),inset 0 1px 0 rgba(255,170,60,0.18);transform:translateY(-1px)}
+.tool-btn.active{border-color:var(--orange2);background:linear-gradient(180deg,rgba(232,134,26,0.22),rgba(140,60,0,0.28));box-shadow:0 0 20px rgba(232,134,26,0.5),inset 0 1px 0 rgba(255,190,80,0.25)}
+.tool-btn.active::after{content:'';position:absolute;top:-1px;left:8px;right:8px;height:2px;background:var(--orange2);border-radius:0 0 2px 2px}
+.t-icon{font-size:22px;line-height:1}
+.t-lbl{font-family:var(--px);font-size:4px;color:rgba(200,216,240,0.4);letter-spacing:0.3px;text-align:center}
+.tool-btn.active .t-lbl{color:var(--orange2)}
 
-.menu-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 80%, rgba(232,134,26,0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 30% 60%, rgba(74,158,232,0.06) 0%, transparent 60%);
-}
+/* ===== CENTER ===== */
+.workshop{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 
-.workshop-illustration {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
-  height: 45%;
-  overflow: hidden;
-}
+/* Ship icon buttons */
+.sib{position:absolute;cursor:pointer;width:54px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;border:2px solid;transition:all 0.13s;z-index:40;box-shadow:0 4px 18px rgba(0,0,0,0.65)}
+.sib::after{content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent}
+.sib:hover{transform:translateY(-4px) scale(1.1);filter:brightness(1.25)}
+.sib:active{transform:scale(0.91)}
+.sib.done{opacity:0.28;filter:grayscale(0.7);pointer-events:none}
+.sib-lbl{font-family:var(--px);font-size:3.8px;margin-top:2px;text-align:center;line-height:1.4;opacity:0.85}
 
-.logo-area {
-  position: relative;
-  text-align: center;
-  margin-bottom: 48px;
-  margin-top: -60px;
-}
+/* Color variants */
+.c-blue  {border-color:#4A9EE8;background:rgba(74,158,232,0.15);color:#4A9EE8}  .c-blue::after{border-top:9px solid #4A9EE8}
+.c-orange{border-color:#E8861A;background:rgba(232,134,26,0.17);color:#E8861A}  .c-orange::after{border-top:9px solid #E8861A}
+.c-yellow{border-color:#FFE000;background:rgba(255,224,0,0.14);color:#FFE000}   .c-yellow::after{border-top:9px solid #FFE000}
+.c-green {border-color:#39FF14;background:rgba(57,255,20,0.12);color:#39FF14}   .c-green::after{border-top:9px solid #39FF14}
+.c-purple{border-color:#BF5FFF;background:rgba(191,95,255,0.14);color:#BF5FFF}  .c-purple::after{border-top:9px solid #BF5FFF}
 
-.logo-sub {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  animation: fadeUp 0.8s ease both;
-}
+/* ===== RIGHT PANEL ===== */
+.info-panel{width:208px;flex-shrink:0;background:linear-gradient(180deg,rgba(6,8,20,0.98),rgba(10,13,28,0.97));border-left:3px solid var(--blue);box-shadow:-4px 0 18px rgba(74,158,232,0.18);display:flex;flex-direction:column;z-index:30;overflow:hidden}
+.ip-sec{border-bottom:1px solid rgba(74,158,232,0.12);padding:10px}
+.ip-lbl{font-family:var(--px);font-size:5px;letter-spacing:2px;color:rgba(74,158,232,0.45);margin-bottom:8px;text-transform:uppercase}
+.client-row{display:flex;gap:8px;align-items:flex-start}
+.c-av{width:38px;height:38px;flex-shrink:0;background:linear-gradient(135deg,rgba(74,158,232,0.18),rgba(8,12,24,0.8));border:1px solid rgba(74,158,232,0.28);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.c-nm{font-family:var(--px);font-size:5.5px;color:var(--blue2);margin-bottom:3px;line-height:1.5}
+.c-sh{font-family:var(--mono);font-size:9px;color:rgba(200,216,240,0.35)}
+.c-rw{font-family:var(--px);font-size:6.5px;color:var(--yellow);margin-top:4px}
+.dialog{margin-top:8px;background:rgba(74,158,232,0.05);border:1px solid rgba(74,158,232,0.18);border-radius:2px;padding:7px;font-family:var(--mono);font-size:9px;color:rgba(200,216,240,0.65);line-height:1.5;position:relative}
+.dialog::before{content:'▶';position:absolute;top:6px;left:-10px;color:var(--blue);font-size:8px}
 
-.logo-title {
-  font-family: var(--head);
-  font-size: clamp(42px, 8vw, 80px);
-  font-weight: 900;
-  letter-spacing: 4px;
-  line-height: 1;
-  color: #fff;
-  text-shadow:
-    0 0 40px rgba(232,134,26,0.6),
-    0 0 80px rgba(232,134,26,0.3);
-  animation: fadeUp 0.8s 0.1s ease both;
-}
+.task-wrap{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:5px}
+.task-it{display:flex;align-items:center;gap:7px;padding:6px 7px;cursor:pointer;background:rgba(8,12,24,0.6);border:1px solid rgba(74,158,232,0.1);border-radius:1px;transition:all 0.12s}
+.task-it:hover:not(.done){border-color:var(--orange);background:rgba(232,134,26,0.05)}
+.task-it.done{opacity:0.32}
+.task-it.act{border-color:var(--orange);background:rgba(232,134,26,0.07);box-shadow:0 0 8px rgba(232,134,26,0.18)}
+.t-chk{width:14px;height:14px;border:1px solid rgba(74,158,232,0.25);border-radius:1px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;background:rgba(8,12,24,0.8)}
+.task-it.done .t-chk{background:var(--green2);border-color:var(--green2);color:#000}
+.t-txt{font-family:var(--mono);font-size:9px;color:rgba(200,216,240,0.65);flex:1}
+.task-it.done .t-txt{text-decoration:line-through;color:rgba(200,216,240,0.25)}
 
-.logo-title span { color: var(--orange); }
+/* DELIVER button — BIG, prominent */
+.deliver-wrap{padding:10px;border-top:2px solid rgba(57,255,20,0.18)}
+.btn-deliver{
+  width:100%;font-family:var(--px);font-size:6.5px;letter-spacing:1px;padding:13px 8px;
+  cursor:pointer;border:none;outline:none;text-transform:uppercase;
+  background:linear-gradient(180deg,#165216,#082808);
+  color:var(--green);border:2px solid var(--green2);border-radius:2px;
+  box-shadow:0 0 18px rgba(57,255,20,0.28),inset 0 1px 0 rgba(57,255,20,0.18);
+  transition:all 0.14s;position:relative;overflow:hidden;
+}
+.btn-deliver:not(:disabled):hover{background:linear-gradient(180deg,#1e6e1e,#0e3c0e);box-shadow:0 0 30px rgba(57,255,20,0.45);transform:translateY(-1px)}
+.btn-deliver:disabled{background:rgba(16,22,16,0.5);color:rgba(57,255,20,0.18);border-color:rgba(57,255,20,0.08);box-shadow:none;cursor:not-allowed}
+.btn-deliver:not(:disabled)::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(57,255,20,0.07),transparent);animation:sw 2s linear infinite}
+@keyframes sw{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
-.logo-tagline {
-  font-family: var(--body);
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 10px;
-  letter-spacing: 2px;
-  animation: fadeUp 0.8s 0.2s ease both;
-}
+/* BOTTOMBAR */
+.bottombar{height:30px;flex-shrink:0;background:rgba(6,8,18,0.98);border-top:1px solid rgba(74,158,232,0.15);display:flex;align-items:center;padding:0 14px;z-index:30}
+.statusbar{font-family:var(--mono);font-size:9px;color:rgba(200,216,240,0.35);letter-spacing:.4px;flex:1}
+.statusbar.ok{color:var(--green2)}.statusbar.warn{color:var(--orange)}
 
-.menu-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-  z-index: 2;
-}
+/* ===== MINIGAME ===== */
+.mg-ov{position:fixed;inset:0;z-index:60;background:rgba(4,6,14,0.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
+.mg-ov.open{display:flex}
+.mg-box{background:linear-gradient(180deg,rgba(12,16,32,0.99),rgba(8,12,24,0.99));border:2px solid var(--orange);border-radius:3px;padding:22px;width:350px;box-shadow:0 0 40px rgba(232,134,26,0.18)}
+.mg-ttl{font-family:var(--px);font-size:7.5px;color:var(--orange);margin-bottom:6px;letter-spacing:1px}
+.mg-dsc{font-family:var(--mono);font-size:10px;color:rgba(200,216,240,0.45);margin-bottom:12px;line-height:1.5}
+.mg-pw{height:4px;background:rgba(8,12,24,0.8);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.mg-pf{height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));border-radius:2px;transition:width 0.3s}
+.weld-tr{height:44px;background:rgba(8,12,24,0.85);border:1px solid rgba(74,158,232,0.18);border-radius:2px;position:relative;overflow:hidden;margin-bottom:12px;cursor:pointer}
+.weld-z{position:absolute;top:0;bottom:0;background:rgba(57,255,20,0.14);border-left:2px solid var(--green2);border-right:2px solid var(--green2)}
+.weld-c{position:absolute;top:4px;bottom:4px;width:5px;background:var(--orange);border-radius:2px;box-shadow:0 0 8px var(--orange);left:0}
+.weld-hr{text-align:center;font-family:var(--mono);font-size:10px;color:rgba(200,216,240,0.35);margin-bottom:10px}
+.scan-area{height:120px;background:rgba(8,12,24,0.85);border:1px solid rgba(74,158,232,0.18);border-radius:2px;position:relative;overflow:hidden;margin-bottom:12px}
+.scan-ln{position:absolute;left:0;right:0;height:2px;top:0;background:linear-gradient(90deg,transparent,var(--green2),transparent);box-shadow:0 0 8px var(--green2);animation:scanM 1.8s linear infinite alternate}
+@keyframes scanM{from{top:0}to{top:calc(100% - 2px)}}
+.blip{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--orange);box-shadow:0 0 10px var(--orange);cursor:pointer;animation:blP 1.1s ease infinite;transform:translate(-50%,-50%)}
+.blip.found{background:var(--green2);box-shadow:0 0 10px var(--green2);animation:none}
+@keyframes blP{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.45)}}
+.parts-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.p-slot{aspect-ratio:1;background:rgba(8,12,24,0.85);border:1px solid rgba(74,158,232,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:25px;cursor:pointer;transition:all 0.12s}
+.p-slot:hover{border-color:var(--blue);transform:scale(1.06)}
+.p-slot.correct{border-color:var(--green2);background:rgba(57,255,20,0.09)}
+.p-slot.wrong{border-color:var(--red);animation:shk 0.3s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.mg-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn-mg{font-family:var(--px);font-size:5.5px;letter-spacing:1px;padding:8px 12px;border:1px solid rgba(74,158,232,0.2);background:rgba(8,12,24,0.85);color:rgba(200,216,240,0.35);cursor:pointer;border-radius:2px;transition:all 0.12s}
+.btn-mg.cf{border-color:var(--orange);color:var(--orange);background:rgba(232,134,26,0.07)}
+.btn-mg:hover{opacity:0.75}
 
-.btn-menu {
-  font-family: var(--head);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  padding: 14px 56px;
-  border: 1px solid var(--border);
-  background: rgba(13,18,37,0.9);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-}
+/* ===== COMPLETION ===== */
+#comp{flex-direction:column;align-items:center;justify-content:center;z-index:70;background:rgba(4,6,14,0.92)}
+.comp-box{background:linear-gradient(180deg,rgba(12,16,32,0.99),rgba(8,12,24,0.99));border:2px solid var(--orange);border-radius:4px;padding:36px 48px;text-align:center;box-shadow:0 0 60px rgba(232,134,26,0.18);animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0.82);opacity:0}to{transform:scale(1);opacity:1}}
+.comp-ic{font-size:50px;margin-bottom:14px;display:block}
+.comp-ttl{font-family:var(--px);font-size:11px;color:var(--orange2);margin-bottom:8px;letter-spacing:2px}
+.comp-cl{font-family:var(--mono);font-size:11px;color:rgba(200,216,240,0.35);margin-bottom:14px}
+.comp-st{font-size:22px;letter-spacing:6px;margin-bottom:14px}
+.comp-rw{font-family:var(--px);font-size:14px;color:var(--yellow);margin-bottom:26px}
+.comp-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
-.btn-menu::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(232,134,26,0.08), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.4s;
-}
+/* ===== UPGRADES ===== */
+#upg{flex-direction:column;align-items:center;justify-content:center;z-index:70;background:rgba(4,6,14,0.95);padding:24px}
+.upg-ttl{font-family:var(--px);font-size:9px;color:var(--orange);letter-spacing:2px;margin-bottom:4px}
+.upg-sub{font-family:var(--mono);font-size:10px;color:rgba(200,216,240,0.3);letter-spacing:2px;margin-bottom:20px}
+.upg-g{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:620px;margin-bottom:20px}
+.upg-c{background:linear-gradient(180deg,rgba(12,16,32,0.98),rgba(8,12,24,0.98));border:1px solid rgba(74,158,232,0.18);border-radius:3px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:all 0.14s;text-align:center}
+.upg-c:hover:not(.owned):not(.locked){border-color:var(--orange);box-shadow:0 0 14px rgba(232,134,26,0.12)}
+.upg-c.owned{border-color:rgba(57,255,20,0.28);opacity:0.55;cursor:default}
+.upg-c.locked{opacity:0.32;cursor:not-allowed}
+.upg-ic{font-size:27px}
+.upg-nm{font-family:var(--px);font-size:5px;color:var(--blue2);letter-spacing:1px;line-height:1.6}
+.upg-ds{font-family:var(--mono);font-size:9px;color:rgba(200,216,240,0.3);line-height:1.4}
+.upg-co{font-family:var(--px);font-size:7px;color:var(--yellow)}
+.upg-c.owned .upg-co{color:var(--green2)}
 
-.btn-menu:hover {
-  border-color: var(--orange);
-  color: var(--orange2);
-  box-shadow: 0 0 20px rgba(232,134,26,0.2), inset 0 0 20px rgba(232,134,26,0.05);
-}
-.btn-menu:hover::before { transform: translateX(100%); }
-.btn-menu:active { transform: scale(0.98); }
-.btn-menu.primary {
-  border-color: var(--orange);
-  color: var(--orange2);
-  background: rgba(232,134,26,0.08);
-}
+/* NOTIFICATIONS */
+.notif{position:fixed;top:52px;right:14px;z-index:200;background:rgba(8,12,24,0.97);border-radius:2px;padding:8px 13px;font-family:var(--mono);font-size:10px;animation:slIn .3s ease,fdOut .4s 2.4s ease forwards;pointer-events:none}
+.notif.ok{border:1px solid var(--green2);color:var(--green2);box-shadow:0 0 10px rgba(57,255,20,0.18)}
+.notif.warn{border:1px solid var(--orange);color:var(--orange2);box-shadow:0 0 10px rgba(232,134,26,0.18)}
+.notif.info{border:1px solid var(--blue);color:var(--blue2);box-shadow:0 0 10px rgba(74,158,232,0.18)}
+@keyframes slIn{from{transform:translateX(18px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fdOut{from{opacity:1}to{opacity:0}}
 
-/* ===================== GAME ===================== */
-#game-screen {
-  flex-direction: column;
-  background: var(--bg);
-}
-
-.game-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  height: 48px;
-}
-
-.topbar-title {
-  font-family: var(--head);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--orange);
-}
-
-.topbar-credits {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--yellow);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.topbar-day {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.game-body {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* Left: tool panel */
-.tool-panel {
-  width: 72px;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 0;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.tool-btn {
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-size: 20px;
-  position: relative;
-}
-
-.tool-btn:hover { border-color: var(--blue); background: rgba(74,158,232,0.08); }
-.tool-btn.active { border-color: var(--orange); background: rgba(232,134,26,0.12); box-shadow: 0 0 12px rgba(232,134,26,0.2); }
-.tool-btn .tool-label {
-  font-family: var(--mono);
-  font-size: 7px;
-  color: var(--muted);
-  margin-top: 2px;
-  letter-spacing: 0.5px;
-}
-.tool-btn.active .tool-label { color: var(--orange); }
-
-/* Center: workshop canvas */
-.workshop-area {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-canvas#workshop {
-  display: block;
-  image-rendering: pixelated;
-}
-
-/* Right: task + client panel */
-.info-panel {
-  width: 220px;
-  background: var(--panel);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.panel-section {
-  border-bottom: 1px solid var(--border);
-  padding: 12px;
-}
-
-.panel-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-/* Client card */
-.client-card {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.client-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  flex-shrink: 0;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg2);
-}
-
-.client-info { flex: 1; min-width: 0; }
-.client-name {
-  font-family: var(--head);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--blue2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.client-ship {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.client-reward {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--yellow);
-  margin-top: 4px;
-}
-
-/* Dialog box */
-.dialog-box {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px;
-  margin-top: 8px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--text);
-  font-family: var(--body);
-  min-height: 48px;
-  position: relative;
-}
-.dialog-box::before {
-  content: '';
-  position: absolute;
-  top: -5px; left: 14px;
-  width: 8px; height: 8px;
-  background: var(--bg2);
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
-  transform: rotate(45deg);
-}
-
-/* Task list */
-.task-list { display: flex; flex-direction: column; gap: 6px; }
-
-.task-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-size: 11px;
-}
-.task-item:hover { border-color: var(--blue); }
-.task-item.done { opacity: 0.4; }
-.task-item.active-task { border-color: var(--orange); background: rgba(232,134,26,0.06); }
-
-.task-check {
-  width: 14px; height: 14px;
-  border: 1px solid var(--muted);
-  border-radius: 2px;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
-}
-.task-item.done .task-check { background: var(--green); border-color: var(--green); color: #000; }
-
-.task-text { flex: 1; color: var(--text); }
-.task-item.done .task-text { text-decoration: line-through; color: var(--muted); }
-
-/* Mini game area */
-.minigame-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(11,15,26,0.85);
-  backdrop-filter: blur(4px);
-  z-index: 20;
-}
-
-.minigame-box {
-  background: var(--panel);
-  border: 1px solid var(--orange);
-  border-radius: 8px;
-  padding: 24px;
-  width: 340px;
-  box-shadow: 0 0 40px rgba(232,134,26,0.15);
-}
-
-.mg-title {
-  font-family: var(--head);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--orange);
-  margin-bottom: 6px;
-}
-
-.mg-desc {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-/* Welding minigame */
-.weld-track {
-  position: relative;
-  height: 40px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 16px;
-  cursor: pointer;
-}
-.weld-zone {
-  position: absolute;
-  top: 0; bottom: 0;
-  background: rgba(74,232,160,0.2);
-  border-left: 2px solid var(--green);
-  border-right: 2px solid var(--green);
-}
-.weld-cursor {
-  position: absolute;
-  top: 4px; bottom: 4px;
-  width: 4px;
-  background: var(--orange);
-  border-radius: 2px;
-  box-shadow: 0 0 8px var(--orange);
-  transition: background 0.1s;
-}
-
-/* Parts minigame */
-.parts-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.part-slot {
-  aspect-ratio: 1;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  cursor: pointer;
-  transition: all 0.15s;
-  position: relative;
-}
-.part-slot:hover { border-color: var(--blue); transform: scale(1.05); }
-.part-slot.selected { border-color: var(--orange); background: rgba(232,134,26,0.1); }
-.part-slot.correct { border-color: var(--green); background: rgba(74,232,160,0.1); }
-.part-slot.wrong { border-color: var(--red); background: rgba(232,74,74,0.1); animation: shake 0.3s; }
-
-/* Scan minigame */
-.scan-area {
-  position: relative;
-  height: 120px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-.scan-line {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--green), transparent);
-  box-shadow: 0 0 8px var(--green);
-}
-.scan-blip {
-  position: absolute;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--orange);
-  box-shadow: 0 0 8px var(--orange);
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.scan-blip:hover { transform: scale(1.4); }
-.scan-blip.found { background: var(--green); box-shadow: 0 0 8px var(--green); }
-
-/* Progress bar */
-.mg-progress {
-  height: 4px;
-  background: var(--bg2);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-.mg-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--blue), var(--orange));
-  border-radius: 2px;
-  transition: width 0.3s;
-}
-
-.mg-buttons { display: flex; gap: 8px; justify-content: flex-end; }
-
-.btn-mg {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1px;
-  padding: 7px 16px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  color: var(--muted);
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
-}
-.btn-mg.confirm {
-  border-color: var(--orange);
-  color: var(--orange);
-  background: rgba(232,134,26,0.08);
-}
-.btn-mg:hover { opacity: 0.8; }
-
-/* Bottom bar */
-.game-bottombar {
-  height: 36px;
-  background: var(--panel);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.status-msg {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  flex: 1;
-}
-.status-msg.ok { color: var(--green); }
-.status-msg.warn { color: var(--orange); }
-
-.btn-done {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1px;
-  padding: 5px 14px;
-  border: 1px solid var(--green);
-  background: rgba(74,232,160,0.08);
-  color: var(--green);
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
-}
-.btn-done:hover { background: rgba(74,232,160,0.15); }
-.btn-done:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--border); color: var(--muted); background: transparent; }
-
-/* ===================== UPGRADE ===================== */
-#upgrade-screen {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-}
-
-.upgrade-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  width: 100%;
-  max-width: 680px;
-  margin: 24px 0;
-}
-
-.upgrade-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-}
-.upgrade-card:hover { border-color: var(--orange); box-shadow: 0 0 20px rgba(232,134,26,0.12); }
-.upgrade-card.owned { border-color: var(--green); opacity: 0.6; cursor: default; }
-.upgrade-card.locked { opacity: 0.4; cursor: not-allowed; }
-
-.upgrade-icon { font-size: 32px; }
-.upgrade-name {
-  font-family: var(--head);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--blue2);
-}
-.upgrade-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
-.upgrade-cost {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--yellow);
-}
-.upgrade-card.owned .upgrade-cost { color: var(--green); }
-
-/* ===================== COMPLETION ===================== */
-#completion-screen {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-}
-
-.completion-box {
-  background: var(--panel);
-  border: 1px solid var(--orange);
-  border-radius: 12px;
-  padding: 40px 48px;
-  text-align: center;
-  box-shadow: 0 0 60px rgba(232,134,26,0.15);
-  max-width: 420px;
-}
-
-.completion-icon { font-size: 48px; margin-bottom: 12px; }
-.completion-title {
-  font-family: var(--head);
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  color: var(--orange2);
-  margin-bottom: 8px;
-}
-.completion-client {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-.completion-reward {
-  font-family: var(--mono);
-  font-size: 24px;
-  color: var(--yellow);
-  margin-bottom: 24px;
-}
-.completion-stars { font-size: 22px; margin-bottom: 20px; letter-spacing: 4px; }
-
-/* ===================== UTILS ===================== */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes shake {
-  0%,100% { transform: translateX(0); }
-  25%  { transform: translateX(-4px); }
-  75%  { transform: translateX(4px); }
-}
-@keyframes scanMove {
-  from { top: 0; }
-  to   { top: calc(100% - 2px); }
-}
-@keyframes pulse {
-  0%,100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-@keyframes floatIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.fade-in { animation: fadeUp 0.5s ease both; }
-
-.notification {
-  position: fixed;
-  top: 60px; right: 16px;
-  background: var(--panel);
-  border: 1px solid var(--green);
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--green);
-  z-index: 100;
-  animation: floatIn 0.3s ease;
-  pointer-events: none;
-}
-.notification.warn { border-color: var(--orange); color: var(--orange); }
-
-.screen-title {
-  font-family: var(--head);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  color: var(--orange);
-  margin-bottom: 4px;
-}
-.screen-sub {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 2px;
-}
+/* Floating anim for ship icons */
+@keyframes fl0{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes fl1{0%,100%{transform:translateY(-3px)}50%{transform:translateY(3px)}}
+@keyframes fl2{0%,100%{transform:translateY(-1px)}50%{transform:translateY(-8px)}}
+@keyframes fl3{0%,100%{transform:translateY(2px)}50%{transform:translateY(-5px)}}
+@keyframes fl4{0%,100%{transform:translateY(-4px)}50%{transform:translateY(2px)}}
 </style>
 </head>
 <body>
 
-<canvas id="stars"></canvas>
+<canvas id="bg"></canvas>
+<canvas id="fx"></canvas>
 
-<!-- ==================== MENU ==================== -->
-<div id="menu-screen" class="screen active">
-  <div class="menu-bg"></div>
-  <div class="logo-area">
+<!-- MENU -->
+<div id="menu" class="screen active">
+  <div class="menu-veil"></div>
+  <div style="position:relative;z-index:2;text-align:center">
     <div class="logo-sub">— Intergalactic Repair Services —</div>
-    <div class="logo-title">STELLAR<span>FIX</span></div>
-    <div class="logo-tagline">Every ship has a story. You write the ending.</div>
+    <div class="logo-main">STELLAR<span>FIX</span></div>
+    <div class="logo-tag">Every ship has a story. You write the ending.</div>
   </div>
-  <div class="menu-buttons">
-    <button class="btn-menu primary" onclick="startGame()">▶ &nbsp;INICIAR JOGO</button>
-    <button class="btn-menu" onclick="showUpgrade()">⚙ &nbsp;UPGRADES</button>
-    <button class="btn-menu" onclick="showAbout()">◈ &nbsp;SOBRE</button>
-  </div>
-
-  <!-- Workshop illustration SVG -->
-  <div class="workshop-illustration">
-    <svg width="100%" height="100%" viewBox="0 0 800 280" preserveAspectRatio="xMidYMax meet">
-      <!-- Floor -->
-      <rect x="0" y="200" width="800" height="80" fill="#0D1220"/>
-      <rect x="0" y="198" width="800" height="4" fill="#1A2235"/>
-      <!-- Floor grid lines -->
-      <line x1="0" y1="202" x2="800" y2="202" stroke="#E8861A" stroke-width="0.5" opacity="0.3"/>
-      <line x1="0" y1="210" x2="800" y2="210" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="0" y1="220" x2="800" y2="220" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="0" y1="230" x2="800" y2="230" stroke="#1E2840" stroke-width="0.5"/>
-      <!-- Perspective floor lines -->
-      <line x1="400" y1="202" x2="0" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="400" y1="202" x2="800" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="400" y1="202" x2="100" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="400" y1="202" x2="700" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="400" y1="202" x2="200" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <line x1="400" y1="202" x2="600" y2="280" stroke="#1E2840" stroke-width="0.5"/>
-      <!-- Back wall -->
-      <rect x="0" y="80" width="800" height="122" fill="#0F1525"/>
-      <line x1="0" y1="82" x2="800" y2="82" stroke="#1E2840" stroke-width="1"/>
-      <!-- Lamp glows -->
-      <ellipse cx="200" cy="100" rx="120" ry="50" fill="#E8861A" opacity="0.06"/>
-      <ellipse cx="600" cy="100" rx="120" ry="50" fill="#E8861A" stroke="none" opacity="0.06"/>
-      <circle cx="200" cy="85" r="6" fill="#FFCC44" opacity="0.9"/>
-      <circle cx="600" cy="85" r="6" fill="#FFCC44" opacity="0.9"/>
-      <line x1="200" y1="82" x2="200" y2="85" stroke="#FFCC44" stroke-width="2"/>
-      <line x1="600" y1="82" x2="600" y2="85" stroke="#FFCC44" stroke-width="2"/>
-      <!-- Ceiling pipe -->
-      <rect x="0" y="78" width="800" height="8" fill="#141928"/>
-      <!-- Tool rack left -->
-      <rect x="20" y="100" width="70" height="100" rx="4" fill="#141a2c" stroke="#1E2840" stroke-width="0.5"/>
-      <rect x="28" y="110" width="54" height="4" rx="2" fill="#1E2840"/>
-      <rect x="36" y="120" width="8" height="36" rx="4" fill="#4A5570"/>
-      <circle cx="40" cy="120" r="8" fill="none" stroke="#4A5570" stroke-width="3"/>
-      <rect x="52" y="120" width="6" height="36" rx="3" fill="#D4763A"/>
-      <rect x="50" y="120" width="10" height="10" rx="2" fill="#3A4460"/>
-      <!-- Workbench right -->
-      <rect x="690" y="140" width="100" height="62" rx="4" fill="#141a2c" stroke="#1E2840" stroke-width="0.5"/>
-      <rect x="690" y="140" width="100" height="3" fill="#4A9EE8" opacity="0.5"/>
-      <circle cx="710" cy="158" r="6" fill="#4A5570"/>
-      <rect x="724" y="152" width="22" height="10" rx="3" fill="#3A5E8C"/>
-      <!-- Main ship -->
-      <ellipse cx="400" cy="175" rx="170" ry="42" fill="#1C2848" stroke="#2E3F60" stroke-width="1.5"/>
-      <ellipse cx="385" cy="152" rx="65" ry="26" fill="#1A3060" stroke="#2E4880" stroke-width="1"/>
-      <ellipse cx="385" cy="148" rx="48" ry="16" fill="#0D1E42" stroke="#3A6AAA" stroke-width="0.8"/>
-      <ellipse cx="378" cy="144" rx="20" ry="7" fill="#1A3A6A" opacity="0.6"/>
-      <!-- Engine glow -->
-      <ellipse cx="238" cy="175" rx="14" ry="9" fill="#E8861A" opacity="0.7"/>
-      <ellipse cx="232" cy="175" rx="7" ry="5" fill="#FFCC44" opacity="0.9"/>
-      <path d="M228 168 Q180 170 150 175 Q180 180 228 182" fill="#E8861A" opacity="0.15"/>
-      <!-- Ship nose -->
-      <path d="M570 172 Q605 170 618 175 Q605 182 570 180 Z" fill="#253560" stroke="#2E3F60" stroke-width="0.8"/>
-      <!-- Landing legs -->
-      <rect x="340" y="214" width="10" height="18" rx="2" fill="#1C2848"/>
-      <rect x="328" y="230" width="34" height="5" rx="2" fill="#253560"/>
-      <rect x="440" y="214" width="10" height="18" rx="2" fill="#1C2848"/>
-      <rect x="428" y="230" width="34" height="5" rx="2" fill="#253560"/>
-      <!-- Sparks -->
-      <circle cx="470" cy="155" r="2.5" fill="#E8861A" opacity="0.9"/>
-      <circle cx="480" cy="148" r="2" fill="#FFCC44" opacity="0.7"/>
-      <circle cx="462" cy="145" r="1.5" fill="#E8861A" opacity="0.6"/>
-    </svg>
+  <div class="menu-btns">
+    <button class="btn-px primary" onclick="startGame()">▶ &nbsp;INICIAR JOGO</button>
+    <button class="btn-px secondary" onclick="goUpg()">⚙ &nbsp;UPGRADES</button>
+    <button class="btn-px secondary" onclick="notify('Stellar Fix v2.0 — Pixel Art Edition','info')">◈ &nbsp;SOBRE</button>
   </div>
 </div>
 
-<!-- ==================== GAME ==================== -->
-<div id="game-screen" class="screen">
-  <div class="game-topbar">
-    <div class="topbar-title">STELLAR FIX — OFICINA</div>
-    <div class="topbar-day" id="day-label">DIA 1</div>
-    <div class="topbar-credits">⬡ <span id="credits-display">500</span></div>
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-logo">STELLAR<span>FIX</span></div>
+      <div class="tb-day" id="day-lbl">DIA 1</div>
+    </div>
+    <div class="tb-cr">⬡ <span id="cr-disp">500</span> CR</div>
   </div>
   <div class="game-body">
 
-    <!-- Tools -->
-    <div class="tool-panel">
-      <div class="tool-btn active" id="tool-scanner" onclick="selectTool('scanner')">
-        🔍<span class="tool-label">SCAN</span>
-      </div>
-      <div class="tool-btn" id="tool-wrench" onclick="selectTool('wrench')">
-        🔧<span class="tool-label">CHAVE</span>
-      </div>
-      <div class="tool-btn" id="tool-welder" onclick="selectTool('welder')">
-        🔥<span class="tool-label">SOLDA</span>
-      </div>
-      <div class="tool-btn" id="tool-parts" onclick="selectTool('parts')">
-        📦<span class="tool-label">PEÇAS</span>
-      </div>
-      <div class="tool-btn" id="tool-paint" onclick="selectTool('paint')">
-        🎨<span class="tool-label">TINTA</span>
-      </div>
+    <!-- LEFT MENU -->
+    <div class="side-menu">
+      <div class="sm-label">TOOLS</div>
+      <div class="tool-btn active" id="tool-scanner" onclick="selTool('scanner')"><div class="t-icon">🔍</div><div class="t-lbl">SCAN</div></div>
+      <div class="tool-btn" id="tool-wrench"  onclick="selTool('wrench')"><div class="t-icon">🔧</div><div class="t-lbl">CHAVE</div></div>
+      <div class="tool-btn" id="tool-welder"  onclick="selTool('welder')"><div class="t-icon">🔥</div><div class="t-lbl">SOLDA</div></div>
+      <div class="sm-sep"></div>
+      <div class="tool-btn" id="tool-parts"   onclick="selTool('parts')"><div class="t-icon">📦</div><div class="t-lbl">PEÇAS</div></div>
+      <div class="tool-btn" id="tool-paint"   onclick="selTool('paint')"><div class="t-icon">🎨</div><div class="t-lbl">TINTA</div></div>
     </div>
 
-    <!-- Workshop canvas -->
-    <div class="workshop-area">
-      <canvas id="workshop"></canvas>
-      <!-- Minigame overlay -->
-      <div class="minigame-overlay" id="minigame-overlay" style="display:none">
-        <div class="minigame-box" id="minigame-box"></div>
-      </div>
-    </div>
+    <!-- CENTER -->
+    <div class="workshop" id="ws"></div>
 
-    <!-- Info panel -->
+    <!-- RIGHT PANEL -->
     <div class="info-panel">
-      <div class="panel-section">
-        <div class="panel-label">Cliente</div>
-        <div class="client-card">
-          <div class="client-avatar" id="client-avatar">👨‍🚀</div>
-          <div class="client-info">
-            <div class="client-name" id="client-name">—</div>
-            <div class="client-ship" id="client-ship">—</div>
-            <div class="client-reward" id="client-reward">—</div>
+      <div class="ip-sec">
+        <div class="ip-lbl">◈ Cliente</div>
+        <div class="client-row">
+          <div class="c-av" id="c-av">👨‍🚀</div>
+          <div>
+            <div class="c-nm" id="c-nm">—</div>
+            <div class="c-sh" id="c-sh">—</div>
+            <div class="c-rw" id="c-rw">—</div>
           </div>
         </div>
-        <div class="dialog-box" id="client-dialog">Aguardando próximo cliente...</div>
+        <div class="dialog" id="c-dlg">Aguardando próximo cliente...</div>
       </div>
-
-      <div class="panel-section" style="flex:1;overflow-y:auto">
-        <div class="panel-label">Tarefas de Reparo</div>
-        <div class="task-list" id="task-list"></div>
+      <div class="ip-lbl" style="padding:10px 10px 4px">◈ Tarefas</div>
+      <div class="task-wrap" id="task-wrap"></div>
+      <div class="deliver-wrap">
+        <button class="btn-deliver" id="btn-del" disabled onclick="completeJob()">✓ ENTREGAR NAVE</button>
       </div>
     </div>
   </div>
-
-  <div class="game-bottombar">
-    <div class="status-msg" id="status-msg">Selecione uma ferramenta e clique na nave para iniciar o reparo.</div>
-    <button class="btn-done" id="btn-done" onclick="completeJob()" disabled>ENTREGAR NAVE ✓</button>
-  </div>
+  <div class="bottombar"><div class="statusbar" id="status">Selecione ferramenta e clique no ícone da nave.</div></div>
 </div>
 
-<!-- ==================== UPGRADE ==================== -->
-<div id="upgrade-screen" class="screen" style="background:var(--bg)">
-  <div class="screen-title">UPGRADES DA OFICINA</div>
-  <div class="screen-sub">Invista seus créditos para melhorar a operação</div>
-  <div class="upgrade-grid" id="upgrade-grid"></div>
-  <button class="btn-menu" onclick="showScreen('menu-screen')" style="margin-top:8px">← VOLTAR</button>
-</div>
-
-<!-- ==================== COMPLETION ==================== -->
-<div id="completion-screen" class="screen" style="background:rgba(11,15,26,0.95)">
-  <div class="completion-box fade-in">
-    <div class="completion-icon">🛸</div>
-    <div class="completion-title" id="comp-title">NAVE ENTREGUE!</div>
-    <div class="completion-client" id="comp-client"></div>
-    <div class="completion-stars" id="comp-stars"></div>
-    <div class="completion-reward" id="comp-reward"></div>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button class="btn-menu primary" onclick="nextClient()">PRÓXIMO CLIENTE →</button>
-      <button class="btn-menu" onclick="showUpgrade()">⚙ UPGRADES</button>
+<!-- COMPLETION -->
+<div id="comp" class="screen">
+  <div class="comp-box">
+    <span class="comp-ic">🛸</span>
+    <div class="comp-ttl" id="comp-ttl">NAVE ENTREGUE!</div>
+    <div class="comp-cl" id="comp-cl"></div>
+    <div class="comp-st" id="comp-st"></div>
+    <div class="comp-rw" id="comp-rw"></div>
+    <div class="comp-row">
+      <button class="btn-px primary" onclick="nextClient()">PRÓXIMO ▶</button>
+      <button class="btn-px secondary" onclick="goUpg()">⚙ UPGRADES</button>
     </div>
   </div>
+</div>
+
+<!-- UPGRADES -->
+<div id="upg" class="screen">
+  <div class="upg-ttl">UPGRADES DA OFICINA</div>
+  <div class="upg-sub">Invista seus créditos para melhorar a operação</div>
+  <div class="upg-g" id="upg-g"></div>
+  <button class="btn-px secondary" onclick="showScr('menu')">← VOLTAR</button>
+</div>
+
+<!-- MINIGAME -->
+<div class="mg-ov" id="mg-ov">
+  <div class="mg-box" id="mg-box"></div>
 </div>
 
 <script>
-// ==================== STARS ====================
-const starsCanvas = document.getElementById('stars');
-const sCtx = starsCanvas.getContext('2d');
-let stars = [];
+// ============================================================
+// PIXEL ART BACKGROUND
+// ============================================================
+const BG=document.getElementById('bg'),BC=BG.getContext('2d');
+const FX=document.getElementById('fx'),FC=FX.getContext('2d');
 
-function initStars() {
-  starsCanvas.width = window.innerWidth;
-  starsCanvas.height = window.innerHeight;
-  stars = Array.from({length: 120}, () => ({
-    x: Math.random() * starsCanvas.width,
-    y: Math.random() * starsCanvas.height,
-    r: Math.random() * 1.5 + 0.3,
-    a: Math.random(),
-    s: Math.random() * 0.005 + 0.002,
-    color: Math.random() > 0.85 ? '#aaaaff' : '#ffffff'
-  }));
+function rz(){
+  BG.width=FX.width=window.innerWidth;
+  BG.height=FX.height=window.innerHeight;
+  drawBg();
 }
 
-function drawStars() {
-  sCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
-  stars.forEach(s => {
-    s.a += s.s;
-    const alpha = (Math.sin(s.a) + 1) / 2 * 0.8 + 0.1;
-    sCtx.beginPath();
-    sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    sCtx.fillStyle = s.color;
-    sCtx.globalAlpha = alpha;
-    sCtx.fill();
+function R(x,y,w,h,c){BC.fillStyle=c;BC.fillRect(~~x,~~y,~~w,~~h)}
+function RS(x,y,w,h,c,lw=1){BC.strokeStyle=c;BC.lineWidth=lw;BC.strokeRect(~~x+.5,~~y+.5,~~w,~~h)}
+function L(x1,y1,x2,y2,c,lw=1,d=[]){BC.strokeStyle=c;BC.lineWidth=lw;BC.setLineDash(d);BC.beginPath();BC.moveTo(~~x1,~~y1);BC.lineTo(~~x2,~~y2);BC.stroke();BC.setLineDash([])}
+function C(x,y,r,c){BC.fillStyle=c;BC.beginPath();BC.arc(~~x,~~y,r,0,Math.PI*2);BC.fill()}
+
+function drawBg(){
+  const W=BG.width,H=BG.height;
+  BC.clearRect(0,0,W,H);
+
+  // Space bg
+  const sg=BC.createLinearGradient(0,0,0,H*.5);
+  sg.addColorStop(0,'#03040a');sg.addColorStop(1,'#070912');
+  BC.fillStyle=sg;BC.fillRect(0,0,W,H*.5);
+
+  // Nebula
+  [[W*.15,H*.25,'rgba(35,15,70,.28)'],[W*.75,H*.35,'rgba(15,40,90,.22)']].forEach(([nx,ny,nc])=>{
+    const ng=BC.createRadialGradient(nx,ny,5,nx,ny,W*.22);
+    ng.addColorStop(0,nc);ng.addColorStop(1,'transparent');
+    BC.fillStyle=ng;BC.fillRect(0,0,W,H*.5);
   });
-  sCtx.globalAlpha = 1;
-  requestAnimationFrame(drawStars);
-}
 
-initStars();
-drawStars();
-window.addEventListener('resize', initStars);
+  // Stars
+  const SD=[[.06,.1],[.15,.05],[.28,.16],[.41,.07],[.55,.12],[.68,.04],[.79,.14],[.91,.08],[.97,.19],[.1,.28],[.23,.35],[.38,.24],[.52,.31],[.65,.22],[.8,.32],[.94,.28],[.04,.42],[.18,.47],[.34,.4],[.49,.44],[.63,.38],[.77,.41],[.92,.46]];
+  SD.forEach(([sx,sy])=>{
+    const a=.35+Math.random()*.65,r=Math.random()>.75?1.5:1;
+    C(W*sx,H*.5*sy,r,`rgba(255,255,255,${a.toFixed(2)})`);
+  });
 
-// ==================== GAME STATE ====================
-const state = {
-  credits: 500,
-  day: 1,
-  currentTool: 'scanner',
-  currentClient: null,
-  tasks: [],
-  tasksCompleted: 0,
-  upgrades: {
-    betterScanner: false,
-    advancedWelder: false,
-    paintBooth: false,
-    extraBay: false,
-    coffeeStation: false,
-    diagnosticAI: false,
+  // Hangar window
+  const wx=W*.24,wy=H*.05,ww=W*.52,wh=H*.38;
+  R(wx-10,wy-10,ww+20,wh+20,'#131d34');
+  RS(wx-10,wy-10,ww+20,wh+20,'#1e2e4a',2);
+  const wg=BC.createLinearGradient(wx,wy,wx,wy+wh);
+  wg.addColorStop(0,'#02030a');wg.addColorStop(1,'#060810');
+  BC.fillStyle=wg;BC.fillRect(wx,wy,ww,wh);
+  // Stars inside window
+  for(let i=0;i<38;i++){
+    C(wx+Math.random()*ww,wy+Math.random()*wh*.82,Math.random()>.8?1.4:.8,`rgba(255,255,255,${(.3+Math.random()*.7).toFixed(2)})`);
   }
-};
-
-const CLIENTS = [
-  { name: 'Zara Vex', ship: 'Scout Classe-7', avatar: '👩‍🚀', dialog: '"Meu motor foi atingido por detritos. Preciso dela de volta hoje!"', reward: 320, tasks: ['scanner','wrench','welder'] },
-  { name: 'Korr Dalan', ship: 'Cargueira Pesada', avatar: '🧑‍🔧', dialog: '"O casco está danificado em três pontos. Cuide bem dela, é meu sustento."', reward: 480, tasks: ['scanner','wrench','parts','welder'] },
-  { name: 'Enna Sol', ship: 'Iate Luxo Mk.II', avatar: '👸', dialog: '"Quero um acabamento impecável. E uma pintura nova, por favor."', reward: 560, tasks: ['scanner','wrench','paint'] },
-  { name: 'Braxx-9', ship: 'Droide Explorador', avatar: '🤖', dialog: '"Sistemas de navegação offline. Probabilidade de reparo: 94.7%"', reward: 290, tasks: ['scanner','parts','wrench'] },
-  { name: 'Mira Odan', ship: 'Fragata Rebelde', avatar: '🧑‍✈️', dialog: '"Não pergunte como ficou assim. Só conserta."', reward: 440, tasks: ['welder','parts','wrench','paint'] },
-  { name: 'Thal & Thal', ship: 'Nave Gêmea', avatar: '👯', dialog: '"São dois em um! Problema no sistema de acoplamento."', reward: 500, tasks: ['scanner','parts','welder'] },
-];
-
-const TASK_INFO = {
-  scanner:  { label: 'Escanear danos',       icon: '🔍', minigame: 'scan' },
-  wrench:   { label: 'Ajustar componentes',  icon: '🔧', minigame: 'weld' },
-  welder:   { label: 'Soldar casco',         icon: '🔥', minigame: 'weld' },
-  parts:    { label: 'Instalar peças',       icon: '📦', minigame: 'parts' },
-  paint:    { label: 'Pintar nave',          icon: '🎨', minigame: 'parts' },
-};
-
-const UPGRADES_DEF = [
-  { id:'betterScanner',  icon:'📡', name:'Scanner Avançado',   desc:'Revela danos ocultos, aumenta recompensa em 15%.',  cost:300 },
-  { id:'advancedWelder', icon:'⚡', name:'Soldador Turbo',     desc:'Mini-jogo de solda mais lento e fácil.',            cost:400 },
-  { id:'paintBooth',     icon:'🎨', name:'Cabine de Pintura',  desc:'Habilita customizações premium (+20% reward).',      cost:350 },
-  { id:'extraBay',       icon:'🛸', name:'Baia Extra',         desc:'Aceite 2 clientes por dia.',                        cost:600 },
-  { id:'coffeeStation',  icon:'☕', name:'Estação de Café',    desc:'+5% eficiência em todos os mini-jogos.',            cost:150 },
-  { id:'diagnosticAI',   icon:'🤖', name:'IA de Diagnóstico', desc:'Auto-detecta o primeiro problema.',                  cost:500 },
-];
-
-// ==================== SCREENS ====================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function showAbout() {
-  notify('Stellar Fix v1.0 — feito com ❤️ e muito café espacial');
-}
-
-// ==================== MENU ====================
-function startGame() {
-  showScreen('game-screen');
-  state.day = 1;
-  document.getElementById('day-label').textContent = `DIA ${state.day}`;
-  loadClient();
-  initWorkshopCanvas();
-}
-
-// ==================== WORKSHOP CANVAS ====================
-const wCanvas = document.getElementById('workshop');
-const wCtx = wCanvas.getContext('2d');
-let shipColor = '#1C2848';
-let isPainted = false;
-
-function initWorkshopCanvas() {
-  const area = document.querySelector('.workshop-area');
-  wCanvas.width = area.clientWidth;
-  wCanvas.height = area.clientHeight;
-  isPainted = false;
-  drawWorkshop();
-}
-
-function drawWorkshop() {
-  const W = wCanvas.width, H = wCanvas.height;
-  const cx = W / 2, cy = H / 2;
-  wCtx.clearRect(0, 0, W, H);
-
-  // Floor
-  wCtx.fillStyle = '#111520';
-  wCtx.fillRect(0, H * 0.55, W, H);
+  // Planet
+  const px=wx+ww*.68,py=wy+wh*.58,pr=wh*.21;
+  const pg=BC.createRadialGradient(px-pr*.3,py-pr*.3,2,px,py,pr);
+  pg.addColorStop(0,'#183260');pg.addColorStop(.6,'#0c1e40');pg.addColorStop(1,'#040c1c');
+  BC.fillStyle=pg;BC.beginPath();BC.arc(px,py,pr,0,Math.PI*2);BC.fill();
+  BC.strokeStyle='rgba(28,52,110,.55)';BC.lineWidth=4;BC.setLineDash([4,2]);
+  BC.beginPath();BC.ellipse(px,py,pr*1.6,pr*.33,.24,0,Math.PI*2);BC.stroke();BC.setLineDash([]);
+  // Window crossbeams
+  R(wx-10,wy+wh/2-5,ww+20,10,'#131d34');
+  R(wx+ww/2-5,wy-10,10,wh+20,'#131d34');
+  RS(wx,wy,ww,wh,'rgba(232,134,26,.15)',1);
 
   // Back wall
-  wCtx.fillStyle = '#0F1525';
-  wCtx.fillRect(0, 0, W, H * 0.57);
-
-  // Grid floor lines
-  wCtx.strokeStyle = '#1E2840';
-  wCtx.lineWidth = 0.5;
-  for (let i = 0; i < 8; i++) {
-    const y = H * 0.57 + i * 22;
-    wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(W, y); wCtx.stroke();
-  }
-  // Dock marker
-  wCtx.strokeStyle = 'rgba(232,134,26,0.3)';
-  wCtx.lineWidth = 1.5;
-  wCtx.setLineDash([8, 6]);
-  wCtx.strokeRect(cx - 180, H * 0.55 + 5, 360, 8);
-  wCtx.setLineDash([]);
-
-  // Ceiling lamp glow
-  const grad = wCtx.createRadialGradient(cx, H * 0.15, 0, cx, H * 0.15, 200);
-  grad.addColorStop(0, 'rgba(255,204,68,0.12)');
-  grad.addColorStop(1, 'rgba(255,204,68,0)');
-  wCtx.fillStyle = grad;
-  wCtx.fillRect(0, 0, W, H * 0.5);
-
-  // Lamp
-  wCtx.fillStyle = '#FFCC44';
-  wCtx.beginPath(); wCtx.arc(cx, H * 0.07, 6, 0, Math.PI * 2); wCtx.fill();
-  wCtx.strokeStyle = '#FFCC44'; wCtx.lineWidth = 1.5;
-  wCtx.beginPath(); wCtx.moveTo(cx, 0); wCtx.lineTo(cx, H * 0.07); wCtx.stroke();
-
-  drawShip(cx, cy - 20);
-}
-
-function drawShip(cx, cy) {
-  const W = wCanvas.width;
-  const client = state.currentClient;
-  const col = isPainted ? '#2A4870' : shipColor;
-
-  // Engine glow
-  const eg = wCtx.createRadialGradient(cx - 165, cy, 0, cx - 165, cy, 40);
-  eg.addColorStop(0, 'rgba(232,134,26,0.6)');
-  eg.addColorStop(1, 'rgba(232,134,26,0)');
-  wCtx.fillStyle = eg;
-  wCtx.fillRect(cx - 220, cy - 40, 100, 80);
-
-  // Hull
-  wCtx.fillStyle = col;
-  wCtx.strokeStyle = '#2E3F60';
-  wCtx.lineWidth = 1.5;
-  wCtx.beginPath();
-  wCtx.ellipse(cx, cy, 165, 44, 0, 0, Math.PI * 2);
-  wCtx.fill(); wCtx.stroke();
-
-  // Cockpit
-  wCtx.fillStyle = '#1A3060';
-  wCtx.strokeStyle = '#2E4880';
-  wCtx.lineWidth = 1;
-  wCtx.beginPath();
-  wCtx.ellipse(cx - 20, cy - 26, 68, 28, 0, 0, Math.PI * 2);
-  wCtx.fill(); wCtx.stroke();
-
-  // Cockpit glass
-  wCtx.fillStyle = '#0D1E42';
-  wCtx.strokeStyle = '#3A6AAA';
-  wCtx.lineWidth = 0.8;
-  wCtx.beginPath();
-  wCtx.ellipse(cx - 20, cy - 30, 50, 18, 0, 0, Math.PI * 2);
-  wCtx.fill(); wCtx.stroke();
-
-  // Glass shine
-  wCtx.fillStyle = 'rgba(74,158,232,0.2)';
-  wCtx.beginPath();
-  wCtx.ellipse(cx - 30, cy - 35, 20, 7, -0.2, 0, Math.PI * 2);
-  wCtx.fill();
-
-  // Nose
-  wCtx.fillStyle = '#253560';
-  wCtx.beginPath();
-  wCtx.moveTo(cx + 165, cy - 8);
-  wCtx.quadraticCurveTo(cx + 210, cy, cx + 165, cy + 8);
-  wCtx.fill();
-
-  // Tail
-  wCtx.fillStyle = '#253560';
-  wCtx.beginPath();
-  wCtx.moveTo(cx - 165, cy - 12);
-  wCtx.quadraticCurveTo(cx - 200, cy - 22, cx - 218, cy - 8);
-  wCtx.quadraticCurveTo(cx - 200, cy + 22, cx - 165, cy + 12);
-  wCtx.fill();
-
-  // Engine flame
-  wCtx.fillStyle = '#E8861A';
-  wCtx.globalAlpha = 0.8;
-  wCtx.beginPath();
-  wCtx.ellipse(cx - 210, cy, 10, 7, 0, 0, Math.PI * 2);
-  wCtx.fill();
-  wCtx.fillStyle = '#FFCC44';
-  wCtx.beginPath();
-  wCtx.ellipse(cx - 205, cy, 5, 3.5, 0, 0, Math.PI * 2);
-  wCtx.fill();
-  wCtx.globalAlpha = 1;
-
-  // Panel lines
-  wCtx.strokeStyle = '#2E3F60';
-  wCtx.lineWidth = 0.5;
-  wCtx.setLineDash([4,3]);
-  wCtx.beginPath(); wCtx.moveTo(cx - 120, cy); wCtx.lineTo(cx + 140, cy); wCtx.stroke();
-  wCtx.setLineDash([]);
-
-  // Damage scratches (if not all done)
-  const done = state.tasksCompleted;
-  const total = state.tasks.length;
-  if (done < total) {
-    wCtx.strokeStyle = '#E84A4A';
-    wCtx.lineWidth = 1.5;
-    wCtx.globalAlpha = 0.5;
-    if (done < 1) {
-      wCtx.beginPath(); wCtx.moveTo(cx + 60, cy - 30); wCtx.lineTo(cx + 80, cy - 18); wCtx.stroke();
-      wCtx.beginPath(); wCtx.moveTo(cx + 75, cy - 35); wCtx.lineTo(cx + 95, cy - 22); wCtx.stroke();
-    }
-    if (done < 2) {
-      wCtx.beginPath(); wCtx.moveTo(cx - 30, cy + 20); wCtx.lineTo(cx - 10, cy + 30); wCtx.stroke();
-    }
-    wCtx.globalAlpha = 1;
-    // Damage sparks
-    wCtx.fillStyle = '#E8861A';
-    wCtx.beginPath(); wCtx.arc(cx + 80, cy - 22, 3, 0, Math.PI * 2); wCtx.fill();
-    wCtx.fillStyle = '#FFCC44';
-    wCtx.beginPath(); wCtx.arc(cx + 90, cy - 28, 2, 0, Math.PI * 2); wCtx.fill();
+  R(0,H*.43,W,H*.57,'#0d1220');
+  L(0,H*.43,W,H*.43,'#1e2a3c',2);
+  // Wall plate texture
+  for(let row=0;row<3;row++)for(let col=0;col<8;col++){
+    RS(W*.02+col*W*.12,H*.43+row*H*.038+2,W*.11,H*.033,'#0a0e1c',.4);
   }
 
-  // Landing legs
-  wCtx.fillStyle = '#1C2848';
-  wCtx.strokeStyle = '#2E3F60';
-  wCtx.lineWidth = 1;
-  [[cx - 60, cy + 44, 36], [cx + 60, cy + 44, 36]].forEach(([lx, ly, w]) => {
-    wCtx.fillRect(lx - 5, ly, 10, 18);
-    wCtx.fillStyle = '#253560';
-    wCtx.fillRect(lx - w/2, ly + 18, w, 5);
-    wCtx.fillStyle = '#1C2848';
+  // Ceiling bar + lamps
+  R(0,H*.43,W,H*.022,'#181e30');
+  [W*.1,W*.25,W*.4,W*.6,W*.75,W*.9].forEach(lx=>{
+    R(lx-W*.04,H*.41,W*.08,H*.022,'#1c2440');
+    RS(lx-W*.04,H*.41,W*.08,H*.022,'#131d34',1);
+    const lg=BC.createRadialGradient(lx,H*.455,0,lx,H*.455,W*.1);
+    lg.addColorStop(0,'rgba(255,210,80,.16)');lg.addColorStop(1,'transparent');
+    BC.fillStyle=lg;BC.fillRect(lx-W*.12,H*.43,W*.24,H*.22);
+    R(lx-W*.012,H*.452,W*.024,H*.012,'#1c2440');
+    C(lx,H*.463,4,'#FFD060');
   });
 
-  // Paint stripe if painted
-  if (isPainted) {
-    wCtx.fillStyle = 'rgba(232,134,26,0.4)';
-    wCtx.beginPath();
-    wCtx.ellipse(cx, cy - 10, 140, 8, 0, 0, Math.PI * 2);
-    wCtx.fill();
+  // Left wall + equipment
+  R(0,H*.45,W*.1,H*.55,'#0b0f1c');
+  RS(0,H*.45,W*.1,H*.55,'#131d34',1);
+  // Console panel
+  R(W*.01,H*.47,W*.08,H*.13,'#0d1828');
+  RS(W*.01,H*.47,W*.08,H*.13,'rgba(0,170,255,.3)',.8);
+  for(let i=0;i<4;i++)C(W*.022+i*W*.018,H*.484,3,i===2?'#E8861A':'#001a44');
+  R(W*.014,H*.495,W*.068,H*.058,'#060e18');
+  BC.fillStyle='rgba(0,200,100,.12)';BC.fillRect(W*.014,H*.495,W*.068,H*.058);
+  RS(W*.014,H*.495,W*.068,H*.058,'rgba(0,200,100,.28)',.8);
+  // Tool rack
+  R(W*.01,H*.63,W*.08,H*.11,'#0c1220');
+  RS(W*.01,H*.63,W*.08,H*.11,'#131d34',1);
+  L(W*.014,H*.646,W*.086,H*.646,'#1c2440',1);
+  ['#4A5570','#D4763A','#4A9EE8'].forEach((c,i)=>R(W*.022+i*W*.022,H*.652,W*.012,H*.072,c));
+  // Barrels L
+  for(let i=0;i<2;i++){
+    const bx=W*.012+i*W*.044,by=H*.752;
+    R(bx,by,W*.036,H*.082,'#141828');RS(bx,by,W*.036,H*.082,'#1c2440',1);
+    L(bx,by+H*.028,bx+W*.036,by+H*.028,'#1c2440',1);
+    L(bx,by+H*.055,bx+W*.036,by+H*.055,'#1c2440',1);
   }
 
-  // Click hint
-  if (state.tasks.length > 0) {
-    const activeTool = state.currentTool;
-    const activeTask = state.tasks.find(t => !t.done && t.tool === activeTool);
-    if (activeTask) {
-      wCtx.strokeStyle = 'rgba(232,134,26,0.5)';
-      wCtx.lineWidth = 1;
-      wCtx.setLineDash([4,4]);
-      wCtx.beginPath();
-      wCtx.ellipse(cx, cy, 175, 54, 0, 0, Math.PI * 2);
-      wCtx.stroke();
-      wCtx.setLineDash([]);
-
-      wCtx.fillStyle = 'rgba(232,134,26,0.8)';
-      wCtx.font = '11px Share Tech Mono';
-      wCtx.textAlign = 'center';
-      wCtx.fillText('▼ CLIQUE NA NAVE ▼', cx, cy + 72);
-    }
-  }
-}
-
-// Click on ship
-document.getElementById('workshop').addEventListener('click', function(e) {
-  const rect = wCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const cx = wCanvas.width / 2;
-  const cy = wCanvas.height / 2 - 20;
-  const dx = (mx - cx) / 175;
-  const dy = (my - cy) / 54;
-  if (dx*dx + dy*dy <= 1.2) {
-    handleShipClick();
-  }
-});
-
-function handleShipClick() {
-  const task = state.tasks.find(t => !t.done && t.tool === state.currentTool);
-  if (!task) {
-    const wrongTask = state.tasks.find(t => !t.done);
-    if (wrongTask) {
-      setStatus(`Use a ferramenta certa: ${TASK_INFO[wrongTask.tool].icon} ${TASK_INFO[wrongTask.tool].label}`, 'warn');
-    }
-    return;
-  }
-  openMinigame(task);
-}
-
-// ==================== CLIENT ====================
-let clientIndex = 0;
-
-function loadClient() {
-  const client = CLIENTS[clientIndex % CLIENTS.length];
-  state.currentClient = client;
-  state.tasksCompleted = 0;
-  state.tasks = client.tasks.map(t => ({ tool: t, done: false }));
-
-  document.getElementById('client-avatar').textContent = client.avatar;
-  document.getElementById('client-name').textContent = client.name;
-  document.getElementById('client-ship').textContent = client.ship;
-  document.getElementById('client-reward').textContent = `⬡ ${client.reward} créditos`;
-  document.getElementById('client-dialog').textContent = client.dialog;
-
-  renderTaskList();
-  document.getElementById('btn-done').disabled = true;
-  setStatus('Selecione uma ferramenta e clique na nave para iniciar o reparo.');
-  drawWorkshop();
-}
-
-function renderTaskList() {
-  const list = document.getElementById('task-list');
-  list.innerHTML = '';
-  state.tasks.forEach((task, i) => {
-    const info = TASK_INFO[task.tool];
-    const div = document.createElement('div');
-    div.className = 'task-item' + (task.done ? ' done' : '');
-    div.id = `task-${i}`;
-    div.innerHTML = `
-      <div class="task-check">${task.done ? '✓' : ''}</div>
-      <div class="task-text">${info.icon} ${info.label}</div>
-    `;
-    div.onclick = () => { if (!task.done) selectTool(task.tool); };
-    list.appendChild(div);
+  // Right wall + bench
+  R(W*.9,H*.45,W*.1,H*.55,'#0b0f1c');
+  RS(W*.9,H*.45,W*.1,H*.55,'#131d34',1);
+  // Workbench
+  R(W*.91,H*.6,W*.085,H*.055,'#18243a');
+  RS(W*.91,H*.6,W*.085,H*.055,'#131d34',1);
+  R(W*.91,H*.6,W*.085,H*.004,'rgba(74,158,232,.55)');
+  C(W*.928,H*.622,5,'#1c2440');
+  R(W*.944,H*.607,W*.028,H*.011,'#0d1828');
+  RS(W*.944,H*.607,W*.028,H*.011,'rgba(74,158,232,.45)',.8);
+  // Panel R
+  R(W*.912,H*.47,W*.08,H*.1,'#0d1828');
+  RS(W*.912,H*.47,W*.08,H*.1,'rgba(0,170,255,.28)',.8);
+  for(let i=0;i<3;i++)C(W*.928+i*W*.022,H*.484,3,i===0?'#00FF88':'#001a44');
+  // Crates R
+  [[W*.888,H*.702],[W*.906,H*.665],[W*.924,H*.702]].forEach(([cx,cy])=>{
+    R(cx,cy,W*.054,H*.048,'#141c14');
+    R(cx,cy,W*.054,H*.007,'#1c2818');
+    RS(cx,cy,W*.054,H*.048,'#22381a',1);
+    L(cx+W*.027,cy,cx+W*.027,cy+H*.048,'#22381a',.4);
   });
-}
-
-function selectTool(tool) {
-  state.currentTool = tool;
-  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tool-${tool}`)?.classList.add('active');
-  drawWorkshop();
-  setStatus(`Ferramenta selecionada: ${TASK_INFO[tool]?.icon} ${TASK_INFO[tool]?.label}. Clique na nave.`);
-}
-
-// ==================== MINIGAMES ====================
-function openMinigame(task) {
-  const info = TASK_INFO[task.tool];
-  const overlay = document.getElementById('minigame-overlay');
-  const box = document.getElementById('minigame-box');
-  overlay.style.display = 'flex';
-
-  if (info.minigame === 'scan') buildScanMinigame(box, task);
-  else if (info.minigame === 'weld') buildWeldMinigame(box, task);
-  else if (info.minigame === 'parts') buildPartsMinigame(box, task);
-}
-
-function closeMinigame(success, task) {
-  document.getElementById('minigame-overlay').style.display = 'none';
-  if (success) {
-    task.done = true;
-    state.tasksCompleted++;
-    renderTaskList();
-    drawWorkshop();
-    notify(`${TASK_INFO[task.tool].icon} Tarefa concluída!`);
-
-    if (isPainted && task.tool === 'paint') drawWorkshop();
-
-    const allDone = state.tasks.every(t => t.done);
-    if (allDone) {
-      document.getElementById('btn-done').disabled = false;
-      setStatus('Todos os reparos concluídos! Clique em "Entregar Nave".', 'ok');
-    } else {
-      setStatus('Bom trabalho! Continue com as próximas tarefas.');
-    }
-  } else {
-    setStatus('Minijogo cancelado. Tente novamente.', 'warn');
+  // Barrels R
+  for(let i=0;i<2;i++){
+    const bx=W*.912+i*W*.038,by=H*.752;
+    R(bx,by,W*.032,H*.078,'#141828');RS(bx,by,W*.032,H*.078,'#1c2440',1);
+    L(bx,by+H*.028,bx+W*.032,by+H*.028,'#1c2440',1);
   }
+
+  // Floor
+  const fy=H*.7;
+  R(0,fy,W,H-fy,'#0c1018');
+  // Grid
+  BC.strokeStyle='#10161e';BC.lineWidth=.5;
+  for(let i=0;i<12;i++){const y=fy+i*(H-fy)/10;BC.beginPath();BC.moveTo(0,y);BC.lineTo(W,y);BC.stroke();}
+  const vx=W/2;
+  for(let i=-7;i<=7;i++){BC.beginPath();BC.moveTo(vx+i*W*.11,fy);BC.lineTo(vx+i*W*.5,H);BC.stroke();}
+  // Floor accent
+  R(0,fy,W,3,'#C96A00');
+  BC.globalAlpha=.38;R(0,fy+3,W,1,'#E8861A');BC.globalAlpha=1;
+  // Dock
+  const dx=W*.22,dy=fy+8,dw=W*.56,dh=H*.075;
+  R(dx,dy,dw,dh,'#0e1320');RS(dx,dy,dw,dh,'#C96A00',1.5);
+  [[dx,dy],[dx+dw-14,dy],[dx,dy+dh-8],[dx+dw-14,dy+dh-8]].forEach(([mx,my])=>R(mx,my,14,8,'#C96A00'));
+  L(W/2,dy,W/2,dy+dh,'rgba(201,106,0,.3)',1,[6,5]);
+  // Cables
+  BC.strokeStyle='#0c1222';BC.lineWidth=2;BC.setLineDash([3,2]);
+  BC.beginPath();BC.moveTo(W*.07,fy+28);BC.quadraticCurveTo(W*.2,fy+58,W*.34,fy+38);BC.stroke();
+  BC.beginPath();BC.moveTo(W*.66,fy+46);BC.quadraticCurveTo(W*.8,fy+28,W*.93,fy+52);BC.stroke();
+  BC.setLineDash([]);
+  // Toolbox on floor
+  R(W*.14,fy+14,W*.058,H*.032,'#181e10');R(W*.14,fy+14,W*.058,H*.009,'#222c14');RS(W*.14,fy+14,W*.058,H*.032,'#30401a',1);
+  R(W*.8,fy+18,W*.048,H*.028,'#0d1828');RS(W*.8,fy+18,W*.048,H*.028,'rgba(74,158,232,.4)',1);
 }
 
-// SCAN minigame
-function buildScanMinigame(box, task) {
-  let found = 0; const total = 3;
-  box.innerHTML = `
-    <div class="mg-title">🔍 ESCANEAMENTO DE DANOS</div>
-    <div class="mg-desc">Encontre todos os pontos de dano na nave. Clique nos indicadores laranja.</div>
-    <div class="mg-progress"><div class="mg-progress-fill" id="mg-prog" style="width:0%"></div></div>
-    <div class="scan-area" id="scan-area">
-      <div class="scan-line" id="scan-line" style="animation: scanMove 2s linear infinite alternate;"></div>
-    </div>
-    <div class="mg-buttons">
-      <button class="btn-mg" onclick="closeMinigame(false, currentMgTask)">CANCELAR</button>
-    </div>
-  `;
-  window.currentMgTask = task;
-  const area = document.getElementById('scan-area');
-  const positions = [[20,30],[55,70],[75,20],[40,50],[85,65]].slice(0,total);
-  positions.forEach((pos, i) => {
-    const blip = document.createElement('div');
-    blip.className = 'scan-blip';
-    blip.style.left = pos[0] + '%';
-    blip.style.top  = pos[1] + '%';
-    blip.style.animationDelay = (i * 0.3) + 's';
-    blip.style.animation = 'pulse 1.2s ease infinite';
-    blip.onclick = () => {
-      if (blip.classList.contains('found')) return;
-      blip.classList.add('found');
-      blip.style.animation = 'none';
-      found++;
-      document.getElementById('mg-prog').style.width = (found/total*100) + '%';
-      if (found >= total) setTimeout(() => closeMinigame(true, task), 400);
-    };
-    area.appendChild(blip);
-  });
+// ============================================================
+// PARTICLE FX
+// ============================================================
+let parts=[];
+const FX_CFG={
+  scanner:{c:'#4A9EE8',t:'scan',  n:24},
+  wrench: {c:'#E8861A',t:'sparks',n:20},
+  welder: {c:'#FFE000',t:'fire',  n:26},
+  parts:  {c:'#39FF14',t:'pop',   n:18},
+  paint:  {c:'#BF5FFF',t:'splash',n:30},
+};
+
+function spawnFx(tool,x,y){
+  const cfg=FX_CFG[tool]||{c:'#fff',t:'sparks',n:16};
+  for(let i=0;i<cfg.n;i++){
+    const a=Math.random()*Math.PI*2,s=1.5+Math.random()*3.8;
+    const p={x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.8,life:1,decay:.02+Math.random()*.025,r:2+Math.random()*3,c:cfg.c,t:cfg.t};
+    if(cfg.t==='fire'){p.vy=-2.8-Math.random()*2;p.vx=(Math.random()-.5)*2}
+    if(cfg.t==='splash'){p.r=3+Math.random()*5;p.decay=.016+Math.random()*.02}
+    if(cfg.t==='scan'){p.vx=(Math.random()-.5)*6;p.vy=(Math.random()-.5)*6;p.r=1+Math.random()*2}
+    parts.push(p);
+  }
+  FC.fillStyle=cfg.c;FC.globalAlpha=.07;FC.fillRect(0,0,FX.width,FX.height);FC.globalAlpha=1;
 }
 
-// WELD minigame
-let weldInterval = null;
-function buildWeldMinigame(box, task) {
-  const isSolder = task.tool === 'welder';
-  let hits = 0; const needed = 3;
-  box.innerHTML = `
-    <div class="mg-title">${isSolder ? '🔥 SOLDAGEM DE CASCO' : '🔧 AJUSTE DE COMPONENTES'}</div>
-    <div class="mg-desc">Clique quando o indicador estiver dentro da zona verde. Acerte ${needed} vezes!</div>
-    <div class="mg-progress"><div class="mg-progress-fill" id="mg-prog" style="width:0%"></div></div>
-    <div class="weld-track" id="weld-track">
-      <div class="weld-zone" id="weld-zone" style="left:35%;width:22%"></div>
-      <div class="weld-cursor" id="weld-cursor" style="left:0%"></div>
-    </div>
-    <div style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px">
-      Acertos: <span id="weld-hits">0</span>/${needed}
-    </div>
-    <div class="mg-buttons">
-      <button class="btn-mg" onclick="stopWeld();closeMinigame(false,currentMgTask)">CANCELAR</button>
-      <button class="btn-mg confirm" id="weld-btn" onclick="checkWeld()">CLIQUE!</button>
-    </div>
-  `;
-  window.currentMgTask = task;
-  let pos = 0; let dir = 1;
-  const speed = state.upgrades.advancedWelder ? 0.6 : 1.0;
-  const coffeeBonus = state.upgrades.coffeeStation ? 0.85 : 1.0;
-  const finalSpeed = speed * coffeeBonus;
-  weldInterval = setInterval(() => {
-    pos += dir * finalSpeed;
-    if (pos >= 98) dir = -1;
-    if (pos <= 0)  dir = 1;
-    const cursor = document.getElementById('weld-cursor');
-    if (cursor) cursor.style.left = pos + '%';
-  }, 16);
-  window.checkWeld = () => {
-    const cursor = document.getElementById('weld-cursor');
-    const zone   = document.getElementById('weld-zone');
-    if (!cursor || !zone) return;
-    const cp = parseFloat(cursor.style.left);
-    const zl = parseFloat(zone.style.left);
-    const zr = zl + parseFloat(zone.style.width);
-    if (cp >= zl && cp <= zr) {
-      hits++;
-      document.getElementById('weld-hits').textContent = hits;
-      document.getElementById('mg-prog').style.width = (hits/needed*100) + '%';
-      cursor.style.background = 'var(--green)';
-      setTimeout(() => { if(cursor) cursor.style.background = 'var(--orange)'; }, 200);
-      if (hits >= needed) { stopWeld(); setTimeout(() => closeMinigame(true, task), 300); }
-    } else {
-      cursor.style.background = 'var(--red)';
-      setTimeout(() => { if(cursor) cursor.style.background = 'var(--orange)'; }, 200);
+function animFx(){
+  FC.clearRect(0,0,FX.width,FX.height);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.vx*=.96;p.life-=p.decay;
+    FC.globalAlpha=Math.max(0,p.life);
+    if(p.t==='sparks'||p.t==='scan'){
+      FC.fillStyle=p.c;FC.fillRect(~~p.x,~~p.y,~~p.r,~~p.r);
+    }else if(p.t==='fire'){
+      FC.fillStyle=p.c;FC.beginPath();FC.arc(p.x,p.y,p.r*(0.5+p.life*.5),0,Math.PI*2);FC.fill();
+      FC.fillStyle='rgba(255,255,255,.25)';FC.beginPath();FC.arc(p.x,p.y,p.r*.28,0,Math.PI*2);FC.fill();
+    }else if(p.t==='pop'){
+      FC.strokeStyle=p.c;FC.lineWidth=1.5;FC.beginPath();FC.arc(p.x,p.y,p.r*(2-p.life),0,Math.PI*2);FC.stroke();
+      FC.fillStyle=p.c;FC.beginPath();FC.arc(p.x,p.y,p.r*.35,0,Math.PI*2);FC.fill();
+    }else if(p.t==='splash'){
+      FC.fillStyle=p.c;const s=p.r*p.life;
+      FC.fillRect(~~(p.x-s/2),~~(p.y-s/2),~~s,~~s);
     }
-  };
-}
-function stopWeld() { if (weldInterval) { clearInterval(weldInterval); weldInterval = null; } }
-
-// PARTS minigame
-function buildPartsMinigame(box, task) {
-  const isPaint = task.tool === 'paint';
-  const allParts = isPaint
-    ? ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤']
-    : ['⚙️','🔩','🔋','💡','🛠️','📡','🔌','⛽','🧲'];
-  const needed = isPaint ? ['🟠','🔵','🟡'] : ['⚙️','🔩','🔋'];
-  const shuffled = [...allParts].sort(() => Math.random() - 0.5);
-  let selected = [];
-  box.innerHTML = `
-    <div class="mg-title">${isPaint ? '🎨 PALETA DE PINTURA' : '📦 SELEÇÃO DE PEÇAS'}</div>
-    <div class="mg-desc">${isPaint ? 'Selecione as 3 cores corretas para a pintura.' : 'Selecione as 3 peças corretas para o reparo.'}</div>
-    <div class="mg-progress"><div class="mg-progress-fill" id="mg-prog" style="width:0%"></div></div>
-    <div class="parts-grid" id="parts-grid"></div>
-    <div class="mg-buttons">
-      <button class="btn-mg" onclick="closeMinigame(false,currentMgTask)">CANCELAR</button>
-    </div>
-  `;
-  window.currentMgTask = task;
-  const grid = document.getElementById('parts-grid');
-  shuffled.forEach(part => {
-    const slot = document.createElement('div');
-    slot.className = 'part-slot';
-    slot.textContent = part;
-    slot.onclick = () => {
-      if (slot.classList.contains('correct')) return;
-      if (needed.includes(part)) {
-        slot.classList.add('correct');
-        selected.push(part);
-        document.getElementById('mg-prog').style.width = (selected.length/needed.length*100) + '%';
-        if (selected.length >= needed.length) {
-          if (isPaint) isPainted = true;
-          setTimeout(() => closeMinigame(true, task), 400);
-        }
-      } else {
-        slot.classList.add('wrong');
-        setTimeout(() => slot.classList.remove('wrong'), 400);
-      }
-    };
-    grid.appendChild(slot);
   });
+  FC.globalAlpha=1;
+  requestAnimationFrame(animFx);
+}
+animFx();
+
+// ============================================================
+// GAME STATE
+// ============================================================
+const S={credits:500,day:1,tool:'scanner',client:null,tasks:[],done:0,upg:{betterScanner:false,advancedWelder:false,paintBooth:false,extraBay:false,coffeeStation:false,diagAI:false}};
+
+const CLIENTS=[
+  {name:'ZARA VEX',ship:'Scout Classe-7',av:'👩‍🚀',dlg:'"Motor atingido por detritos. Preciso dela de volta hoje!"',rew:320,tasks:['scanner','wrench','welder']},
+  {name:'KORR DALAN',ship:'Cargueira Pesada',av:'🧑‍🔧',dlg:'"Casco danificado em três pontos. É meu sustento."',rew:480,tasks:['scanner','wrench','parts','welder']},
+  {name:'ENNA SOL',ship:'Iate Luxo Mk.II',av:'👸',dlg:'"Acabamento impecável. E pintura nova, por favor."',rew:560,tasks:['scanner','wrench','paint']},
+  {name:'BRAXX-9',ship:'Droide Explorador',av:'🤖',dlg:'"Navegação offline. Probabilidade de reparo: 94.7%"',rew:290,tasks:['scanner','parts','wrench']},
+  {name:'MIRA ODAN',ship:'Fragata Rebelde',av:'🧑‍✈️',dlg:'"Não pergunte como ficou assim. Só conserta."',rew:440,tasks:['welder','parts','wrench','paint']},
+  {name:'THAL & THAL',ship:'Nave Gêmea',av:'👯',dlg:'"Problema no acoplamento. Dois em um!"',rew:500,tasks:['scanner','parts','welder']},
+];
+
+const TI={
+  scanner:{lbl:'Escanear danos',    ic:'🔍',c:'c-blue',  fxc:'scanner'},
+  wrench: {lbl:'Ajustar componentes',ic:'🔧',c:'c-orange',fxc:'wrench'},
+  welder: {lbl:'Soldar casco',      ic:'🔥',c:'c-yellow', fxc:'welder'},
+  parts:  {lbl:'Instalar peças',    ic:'📦',c:'c-green',  fxc:'parts'},
+  paint:  {lbl:'Pintar nave',       ic:'🎨',c:'c-purple', fxc:'paint'},
+};
+
+const UPG_DEF=[
+  {id:'betterScanner',ic:'📡',nm:'Scanner Avançado', ds:'Revela danos ocultos. +15% recompensa.',co:300},
+  {id:'advancedWelder',ic:'⚡',nm:'Soldador Turbo',  ds:'Mini-jogo de solda mais lento.',        co:400},
+  {id:'paintBooth',   ic:'🎨',nm:'Cabine de Pintura',ds:'Customizações premium. +20% reward.',   co:350},
+  {id:'extraBay',     ic:'🛸',nm:'Baia Extra',       ds:'Aceite 2 clientes por dia.',            co:600},
+  {id:'coffeeStation',ic:'☕',nm:'Café Espacial',    ds:'+5% eficiência em todos os jogos.',     co:150},
+  {id:'diagAI',       ic:'🤖',nm:'IA Diagnóstico',   ds:'Auto-detecta o primeiro problema.',     co:500},
+];
+
+let clientIdx=0,weldIv=null;
+
+// ============================================================
+// SCREENS
+// ============================================================
+function showScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function startGame(){showScr('game');S.day=1;document.getElementById('day-lbl').textContent='DIA 1';loadClient()}
+function goUpg(){renderUpg();showScr('upg')}
+
+// ============================================================
+// CLIENT
+// ============================================================
+function loadClient(){
+  const c=CLIENTS[clientIdx%CLIENTS.length];
+  S.client=c;S.done=0;S.tasks=c.tasks.map(t=>({tool:t,done:false}));
+  document.getElementById('c-av').textContent=c.av;
+  document.getElementById('c-nm').textContent=c.name;
+  document.getElementById('c-sh').textContent=c.ship;
+  document.getElementById('c-rw').textContent=`⬡ ${c.rew} CR`;
+  document.getElementById('c-dlg').textContent=c.dlg;
+  renderTasks();renderSIBs();
+  document.getElementById('btn-del').disabled=true;
+  setSt('Selecione ferramenta e clique no ícone da nave.');
 }
 
-// ==================== JOB COMPLETE ====================
-function completeJob() {
-  stopWeld();
-  const client = state.currentClient;
-  let reward = client.reward;
-  if (state.upgrades.betterScanner) reward = Math.round(reward * 1.15);
-  if (state.upgrades.paintBooth && isPainted) reward = Math.round(reward * 1.2);
+// ============================================================
+// SHIP ICON BUTTONS
+// ============================================================
+// Positions relative to center of workshop div
+const SIB_POS=[
+  {dx:-.22,dy:-.24},{dx:.06,dy:-.3},{dx:.24,dy:-.18},
+  {dx:-.15,dy:-.05},{dx:.18,dy:.02}
+];
 
-  state.credits += reward;
-  document.getElementById('credits-display').textContent = state.credits;
-  isPainted = false;
-
-  const stars = reward > 500 ? '★★★' : reward > 350 ? '★★☆' : '★☆☆';
-  document.getElementById('comp-title').textContent = 'NAVE ENTREGUE!';
-  document.getElementById('comp-client').textContent = `${client.name} — ${client.ship}`;
-  document.getElementById('comp-stars').textContent = stars;
-  document.getElementById('comp-reward').textContent = `+ ⬡ ${reward} créditos`;
-
-  showScreen('completion-screen');
-}
-
-function nextClient() {
-  clientIndex++;
-  state.day++;
-  document.getElementById('day-label').textContent = `DIA ${state.day}`;
-  showScreen('game-screen');
-  loadClient();
-}
-
-// ==================== UPGRADES ====================
-function showUpgrade() {
-  renderUpgrades();
-  showScreen('upgrade-screen');
-}
-
-function renderUpgrades() {
-  const grid = document.getElementById('upgrade-grid');
-  grid.innerHTML = '';
-  UPGRADES_DEF.forEach(upg => {
-    const owned = state.upgrades[upg.id];
-    const canAfford = state.credits >= upg.cost;
-    const card = document.createElement('div');
-    card.className = 'upgrade-card' + (owned ? ' owned' : (!canAfford ? ' locked' : ''));
-    card.innerHTML = `
-      <div class="upgrade-icon">${upg.icon}</div>
-      <div class="upgrade-name">${upg.name}</div>
-      <div class="upgrade-desc">${upg.desc}</div>
-      <div class="upgrade-cost">${owned ? '✓ INSTALADO' : `⬡ ${upg.cost}`}</div>
-    `;
-    if (!owned && canAfford) {
-      card.onclick = () => {
-        state.credits -= upg.cost;
-        state.upgrades[upg.id] = true;
-        document.getElementById('credits-display').textContent = state.credits;
-        notify(`${upg.icon} ${upg.name} instalado!`);
-        renderUpgrades();
+function renderSIBs(){
+  const ws=document.getElementById('ws');
+  ws.querySelectorAll('.sib').forEach(e=>e.remove());
+  const W=ws.clientWidth,H=ws.clientHeight;
+  S.tasks.forEach((task,i)=>{
+    const info=TI[task.tool];
+    const pos=SIB_POS[i%SIB_POS.length];
+    const btn=document.createElement('div');
+    btn.className=`sib ${info.c}${task.done?' done':''}`;
+    btn.id=`sib${i}`;
+    btn.style.left=`calc(50% + ${pos.dx*W}px)`;
+    btn.style.top=`calc(50% + ${pos.dy*H}px)`;
+    btn.style.animation=`fl${i%5} ${2.2+i*.28}s ease-in-out infinite`;
+    btn.innerHTML=`<span style="font-size:22px">${info.ic}</span><div class="sib-lbl">${info.lbl.split(' ').slice(0,2).join('\n')}</div>`;
+    if(!task.done){
+      btn.onclick=e=>{
+        e.stopPropagation();
+        selTool(task.tool);
+        const r=btn.getBoundingClientRect();
+        spawnFx(info.fxc,r.left+r.width/2,r.top+r.height/2);
+        openMg(task);
       };
     }
-    grid.appendChild(card);
+    ws.appendChild(btn);
   });
 }
 
-// ==================== UTILS ====================
-function setStatus(msg, type = '') {
-  const el = document.getElementById('status-msg');
-  el.textContent = msg;
-  el.className = 'status-msg' + (type ? ' ' + type : '');
+// ============================================================
+// TOOL SELECT
+// ============================================================
+function selTool(t){
+  S.tool=t;
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tool-'+t)?.classList.add('active');
+  setSt(`Ferramenta: ${TI[t]?.ic} ${TI[t]?.lbl}. Clique no ícone da nave.`);
 }
 
-function notify(msg, type = '') {
-  const n = document.createElement('div');
-  n.className = 'notification' + (type ? ' ' + type : '');
-  n.textContent = msg;
-  document.body.appendChild(n);
-  setTimeout(() => n.remove(), 2800);
+// ============================================================
+// TASKS
+// ============================================================
+function renderTasks(){
+  const w=document.getElementById('task-wrap');w.innerHTML='';
+  S.tasks.forEach((task,i)=>{
+    const info=TI[task.tool];
+    const d=document.createElement('div');
+    d.className='task-it'+(task.done?' done':'');
+    d.innerHTML=`<div class="t-chk">${task.done?'✓':''}</div><div class="t-txt">${info.ic} ${info.lbl}</div>`;
+    d.onclick=()=>{if(!task.done)selTool(task.tool)};
+    w.appendChild(d);
+  });
 }
 
-window.addEventListener('resize', () => {
-  if (document.getElementById('game-screen').classList.contains('active')) {
-    initWorkshopCanvas();
-  }
-});
+// ============================================================
+// MINIGAMES
+// ============================================================
+function openMg(task){
+  const info=TI[task.tool];
+  const ov=document.getElementById('mg-ov'),box=document.getElementById('mg-box');
+  ov.classList.add('open');
+  // color the border to match icon
+  const cc={'c-blue':'#4A9EE8','c-orange':'#E8861A','c-yellow':'#FFE000','c-green':'#39FF14','c-purple':'#BF5FFF'};
+  const col=cc[info.c]||'#E8861A';
+  box.style.borderColor=col;
+  box.style.boxShadow=`0 0 36px ${col}28`;
+  if(task.tool==='scanner') buildScan(box,task);
+  else if(task.tool==='welder'||task.tool==='wrench') buildWeld(box,task);
+  else buildParts(box,task);
+}
+function closeMg(ok,task){
+  document.getElementById('mg-ov').classList.remove('open');
+  if(ok){
+    task.done=true;S.done++;
+    renderTasks();renderSIBs();
+    notify(`${TI[task.tool].ic} Concluído!`,'ok');
+    if(S.tasks.every(t=>t.done)){document.getElementById('btn-del').disabled=false;setSt('Todos os reparos OK! Entregue a nave.','ok')}
+    else setSt('Bom trabalho! Continue.');
+  } else setSt('Cancelado.','warn');
+}
+
+function buildScan(box,task){
+  let found=0;const tot=3;
+  box.innerHTML=`<div class="mg-ttl">🔍 ESCANEAMENTO</div><div class="mg-dsc">Encontre os ${tot} pontos de dano na nave.</div><div class="mg-pw"><div class="mg-pf" id="mgp" style="width:0%"></div></div><div class="scan-area" id="sa"><div class="scan-ln"></div></div><div class="mg-btns"><button class="btn-mg" onclick="closeMg(false,window._t)">CANCELAR</button></div>`;
+  window._t=task;
+  const sa=document.getElementById('sa');
+  [[20,35],[55,65],[78,25],[42,55],[85,70]].slice(0,tot).forEach(([lx,ly],i)=>{
+    const b=document.createElement('div');b.className='blip';b.style.left=lx+'%';b.style.top=ly+'%';b.style.animationDelay=(i*.4)+'s';
+    b.onclick=()=>{if(b.classList.contains('found'))return;b.classList.add('found');found++;document.getElementById('mgp').style.width=(found/tot*100)+'%';if(found>=tot)setTimeout(()=>closeMg(true,task),320)};
+    sa.appendChild(b);
+  });
+}
+
+function buildWeld(box,task){
+  let hits=0;const need=3;const isSol=task.tool==='welder';
+  box.innerHTML=`<div class="mg-ttl">${isSol?'🔥 SOLDAGEM':'🔧 AJUSTE'}</div><div class="mg-dsc">Clique quando o cursor estiver na zona verde. ${need} acertos!</div><div class="mg-pw"><div class="mg-pf" id="mgp" style="width:0%"></div></div><div class="weld-tr" id="wt"><div class="weld-z" style="left:35%;width:24%"></div><div class="weld-c" id="wc"></div></div><div class="weld-hr">Acertos: <span id="wh">0</span>/${need}</div><div class="mg-btns"><button class="btn-mg" onclick="stopWeld();closeMg(false,window._t)">CANCELAR</button><button class="btn-mg cf" onclick="checkWeld()">▶ CLIQUE!</button></div>`;
+  window._t=task;
+  let pos=0,dir=1;
+  const spd=(S.upg.advancedWelder?.55:1)*(S.upg.coffeeStation?.9:1);
+  weldIv=setInterval(()=>{pos+=dir*spd;if(pos>=98)dir=-1;if(pos<=0)dir=1;const c=document.getElementById('wc');if(c)c.style.left=pos+'%'},16);
+  window.checkWeld=()=>{
+    const c=document.getElementById('wc');if(!c)return;
+    const cp=parseFloat(c.style.left);
+    if(cp>=35&&cp<=59){hits++;document.getElementById('wh').textContent=hits;document.getElementById('mgp').style.width=(hits/need*100)+'%';c.style.background='#39FF14';setTimeout(()=>{if(c)c.style.background='var(--orange)'},180);if(hits>=need){stopWeld();setTimeout(()=>closeMg(true,task),260)}}
+    else{c.style.background='#FF3C3C';setTimeout(()=>{if(c)c.style.background='var(--orange)'},180)}
+  };
+}
+function stopWeld(){if(weldIv){clearInterval(weldIv);weldIv=null}}
+
+function buildParts(box,task){
+  const isPaint=task.tool==='paint';
+  const all=isPaint?['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤']:['⚙️','🔩','🔋','💡','🛠️','📡','🔌','⛽','🧲'];
+  const need=isPaint?['🟠','🔵','🟡']:['⚙️','🔩','🔋'];
+  const shuf=[...all].sort(()=>Math.random()-.5);
+  let sel=[];
+  box.innerHTML=`<div class="mg-ttl">${isPaint?'🎨 PALETA':'📦 PEÇAS'}</div><div class="mg-dsc">${isPaint?'Selecione as 3 cores corretas.':'Selecione as 3 peças corretas.'}</div><div class="mg-pw"><div class="mg-pf" id="mgp" style="width:0%"></div></div><div class="parts-g" id="pg"></div><div class="mg-btns"><button class="btn-mg" onclick="closeMg(false,window._t)">CANCELAR</button></div>`;
+  window._t=task;
+  const g=document.getElementById('pg');
+  shuf.forEach(p=>{
+    const s=document.createElement('div');s.className='p-slot';s.textContent=p;
+    s.onclick=()=>{if(s.classList.contains('correct'))return;if(need.includes(p)){s.classList.add('correct');sel.push(p);document.getElementById('mgp').style.width=(sel.length/need.length*100)+'%';if(sel.length>=need.length)setTimeout(()=>closeMg(true,task),320)}else{s.classList.add('wrong');setTimeout(()=>s.classList.remove('wrong'),320)}};
+    g.appendChild(s);
+  });
+}
+
+// ============================================================
+// JOB COMPLETE
+// ============================================================
+function completeJob(){
+  stopWeld();
+  const c=S.client;let r=c.rew;
+  if(S.upg.betterScanner)r=Math.round(r*1.15);
+  if(S.upg.paintBooth&&S.tasks.find(t=>t.tool==='paint'))r=Math.round(r*1.2);
+  S.credits+=r;document.getElementById('cr-disp').textContent=S.credits;
+  const stars=r>500?'★★★':r>350?'★★☆':'★☆☆';
+  document.getElementById('comp-ttl').textContent='NAVE ENTREGUE!';
+  document.getElementById('comp-cl').textContent=`${c.name} — ${c.ship}`;
+  document.getElementById('comp-st').textContent=stars;
+  document.getElementById('comp-rw').textContent=`+ ⬡ ${r} CR`;
+  showScr('comp');
+  // Confetti burst
+  for(let i=0;i<5;i++)setTimeout(()=>spawnFx(['scanner','wrench','welder','parts','paint'][i],innerWidth/2+(Math.random()-.5)*300,innerHeight/2+(Math.random()-.5)*150),i*100);
+}
+
+function nextClient(){clientIdx++;S.day++;document.getElementById('day-lbl').textContent=`DIA ${S.day}`;showScr('game');loadClient()}
+
+// ============================================================
+// UPGRADES
+// ============================================================
+function renderUpg(){
+  const g=document.getElementById('upg-g');g.innerHTML='';
+  UPG_DEF.forEach(u=>{
+    const owned=S.upg[u.id],can=S.credits>=u.co;
+    const d=document.createElement('div');
+    d.className='upg-c'+(owned?' owned':!can?' locked':'');
+    d.innerHTML=`<div class="upg-ic">${u.ic}</div><div class="upg-nm">${u.nm}</div><div class="upg-ds">${u.ds}</div><div class="upg-co">${owned?'✓ INSTALADO':'⬡ '+u.co}</div>`;
+    if(!owned&&can)d.onclick=()=>{S.credits-=u.co;S.upg[u.id]=true;document.getElementById('cr-disp').textContent=S.credits;notify(`${u.ic} ${u.nm} instalado!`,'ok');renderUpg()};
+    g.appendChild(d);
+  });
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function setSt(msg,type=''){const el=document.getElementById('status');el.textContent=msg;el.className='statusbar'+(type?' '+type:'')}
+function notify(msg,type='ok'){const n=document.createElement('div');n.className=`notif ${type}`;n.textContent=msg;document.body.appendChild(n);setTimeout(()=>n.remove(),2900)}
+
+window.addEventListener('resize',()=>{rz();FX.width=window.innerWidth;FX.height=window.innerHeight;if(document.getElementById('game').classList.contains('active'))renderSIBs()});
+rz();
 </script>
 </body>
 </html>
