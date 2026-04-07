@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Stellar Fix — Unity Project Setup
 
 ## Requisitos
@@ -126,3 +127,6 @@ StellarFix/
 - `Workshop` — oficina principal (tilemap pixel art, mecânica de reparo)
 - `Dialogue` — sistema de diálogo com clientes
 - `Inventory` — inventário de peças e ferramentas
+=======
+# stellar-fix
+>>>>>>> 97efc995312a0a8c38e574d8dd0c2b2467d1e968

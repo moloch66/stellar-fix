@@ -8,1238 +8,481 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ═══════════════════════════════════════════════════════
-   BASE / RESET
-═══════════════════════════════════════════════════════ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+*,*::before,*::after{box-sizing:border-box;image-rendering:pixelated;image-rendering:crisp-edges;}
+:root{
+  --orange:#fb6b3c;--yellow:#f5c518;--green:#00e676;--red:#f44336;--blue:#42a5f5;--cyan:#00f5ff;
+  --dark:#070d1a;--panel:rgba(6,10,24,0.92);--border:rgba(251,107,60,0.55);--font:'Press Start 2P',monospace;
 }
-
-:root {
-  --orange : #fb6b3c;
-  --yellow : #f5c518;
-  --green  : #00e676;
-  --red    : #f44336;
-  --blue   : #42a5f5;
-  --cyan   : #00f5ff;
-  --dark   : #070d1a;
-  --panel  : rgba(6,10,24,0.92);
-  --border : rgba(251,107,60,0.55);
-  --font   : 'Press Start 2P', monospace;
-}
-
-html, body {
-  margin: 0; padding: 0;
-  width: 100vw; height: 100vh;
-  overflow: hidden;
-  background: #000;
-  font-family: var(--font);
-}
-
-/* ═══════════════════════════════════════════════════════
-   SCREENS
-═══════════════════════════════════════════════════════ */
-.screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  transition: opacity 0.6s ease;
-}
-
-.screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Full-cover background images */
-.bg-cover-img {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* ── Scanlines (pixel art feel) */
-.scanlines {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent, transparent 2px,
-    rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
-  );
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── CRT vignette */
-.vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.72) 100%);
-  pointer-events: none;
-  z-index: 3;
-}
-
-/* ═══════════════════════════════════════════════════════
-   SCREEN 1 — MAIN MENU
-═══════════════════════════════════════════════════════ */
-#screen-menu {
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* Fallback background for screen 1 if image not loaded */
-#bg-menu {
-  background-image: url('web-assets/bg1.jpg');
-  background-color: #0d1420;
-}
-
-.menu-panel {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 40px;
-  margin-right: 60px;
-  gap: 0;
-  background: rgba(4, 8, 20, 0.82);
-  border: 3px solid rgba(0,245,255,0.2);
-  border-left: 4px solid var(--cyan);
-  box-shadow:
-    8px 8px 0 rgba(0,0,0,0.8),
-    0 0 40px rgba(0,245,255,0.08),
-    inset 0 0 30px rgba(0,0,0,0.3);
-  min-width: 320px;
-}
-
-.game-logo {
-  font-size: 26px;
-  color: var(--cyan);
-  text-shadow:
-    3px 3px 0 #003a5a,
-    0 0 20px rgba(0,245,255,0.6),
-    0 0 40px rgba(0,245,255,0.3);
-  letter-spacing: 4px;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.game-sub {
-  font-size: 7px;
-  color: rgba(160,200,255,0.6);
-  letter-spacing: 2px;
-  margin-bottom: 32px;
-  margin-top: 2px;
-}
-
-.menu-divider {
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--cyan), transparent);
-  margin-bottom: 28px;
-  opacity: 0.4;
-}
-
-.menu-btn {
-  font-family: var(--font);
-  font-size: 10px;
-  letter-spacing: 2px;
-  background: rgba(8,15,35,0.9);
-  border: 2px solid rgba(0,245,255,0.25);
-  border-left: 4px solid rgba(0,245,255,0.6);
-  color: #9ac8f0;
-  padding: 14px 28px;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
-  transition: all 0.08s;
-  margin-bottom: 8px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.menu-btn::before {
-  content: '▸';
-  color: var(--cyan);
-  font-size: 10px;
-  opacity: 0.5;
-  transition: opacity 0.1s;
-}
-
-.menu-btn:hover {
-  background: rgba(0,245,255,0.1);
-  border-color: var(--cyan);
-  color: #fff;
-  box-shadow: 6px 6px 0 rgba(0,0,0,0.8), 0 0 18px rgba(0,245,255,0.25);
-  transform: translateX(6px);
-}
-
-.menu-btn:hover::before { opacity: 1; }
-
-.menu-btn:active {
-  transform: translate(3px,3px);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-}
-
-.menu-version {
-  position: absolute;
-  bottom: 16px;
-  right: 20px;
-  font-size: 7px;
-  color: rgba(255,255,255,0.2);
-  z-index: 10;
-}
-
-/* Star field overlay for menu */
-#stars-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-/* ═══════════════════════════════════════════════════════
-   SCREEN 2 — WORKSHOP
-═══════════════════════════════════════════════════════ */
-#screen-workshop {
-  flex-direction: row;
-}
-
-#bg-workshop {
-  background-image: url('web-assets/bg2.jpg');
-  background-color: #0d1015;
-}
-
-/* ── SIDEBAR ──────────────────────────────────────── */
-.sidebar {
-  position: relative;
-  z-index: 30;
-  width: 110px;
-  flex-shrink: 0;
-  background: rgba(5,8,20,0.96);
-  border-right: 3px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 6px;
-  gap: 6px;
-  box-shadow: 6px 0 24px rgba(0,0,0,0.9), inset -4px 0 12px rgba(0,0,0,0.5);
-}
-
-.sidebar-logo {
-  font-size: 7px;
-  color: var(--orange);
-  letter-spacing: 1px;
-  padding: 6px 4px 10px;
-  text-align: center;
-  border-bottom: 2px solid rgba(251,107,60,0.3);
-  width: 100%;
-  line-height: 1.6;
-}
-
-.sidebar-logo span {
-  display: block;
-  font-size: 11px;
-  color: var(--cyan);
-  letter-spacing: 3px;
-}
-
-.sb-btn {
-  width: 94px;
-  height: 90px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  cursor: pointer;
-  border: 3px solid rgba(80,100,160,0.35);
-  background: rgba(12,18,40,0.9);
-  transition: all 0.1s;
-  font-size: 7px;
-  color: #6080a0;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  position: relative;
-  overflow: hidden;
-}
-
-.sb-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 2px solid transparent;
-  transition: border-color 0.1s;
-}
-
-.sb-btn:hover {
-  background: rgba(25,38,80,0.95);
-  border-color: var(--orange);
-  color: #eee;
-  box-shadow: 0 0 16px rgba(251,107,60,0.35), inset 0 0 12px rgba(251,107,60,0.08);
-}
-
-.sb-btn:hover::after {
-  border-color: rgba(251,107,60,0.2);
-}
-
-.sb-btn.active {
-  border-color: var(--orange);
-  background: rgba(251,107,60,0.18);
-  color: var(--orange);
-  box-shadow: 0 0 20px rgba(251,107,60,0.45), inset 0 0 16px rgba(251,107,60,0.12);
-}
-
-.sb-btn .sb-icon {
-  font-size: 26px;
-  line-height: 1;
-  filter: drop-shadow(0 0 4px currentColor);
-}
-
-.sb-btn .sb-label {
-  font-size: 6.5px;
-  letter-spacing: 1.5px;
-}
-
-.sb-separator {
-  width: 80%;
-  height: 1px;
-  background: rgba(255,255,255,0.08);
-}
-
-/* Deliver button in sidebar */
-.deliver-btn {
-  width: 94px;
-  min-height: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  margin-top: auto;
-  border: 3px solid #ff7a45;
-  background: linear-gradient(180deg, #c94e1a 0%, #8a2800 100%);
-  color: #ffe8d0;
-  font-family: var(--font);
-  font-size: 6.5px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  box-shadow:
-    0 0 20px rgba(251,107,60,0.6),
-    5px 5px 0 rgba(0,0,0,0.8),
-    inset 0 2px 0 rgba(255,150,80,0.3);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
-  transition: all 0.1s;
-  animation: deliverPulse 2.5s ease-in-out infinite;
-  position: relative;
-}
-
-.deliver-btn .deliver-icon {
-  font-size: 22px;
-  filter: drop-shadow(0 0 6px #ff9060);
-}
-
-.deliver-btn .deliver-label {
-  text-align: center;
-  line-height: 1.6;
-}
-
-@keyframes deliverPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(251,107,60,0.6), 5px 5px 0 rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,150,80,0.3); }
-  50%       { box-shadow: 0 0 35px rgba(251,107,60,0.9), 5px 5px 0 rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,150,80,0.3); }
-}
-
-.deliver-btn:hover {
-  background: linear-gradient(180deg, #fb6b3c 0%, #b03800 100%);
-  border-color: #ffa070;
-  transform: translate(-2px,-2px);
-  box-shadow:
-    0 0 40px rgba(251,107,60,0.9),
-    8px 8px 0 rgba(0,0,0,0.8),
-    inset 0 2px 0 rgba(255,180,100,0.4);
-}
-
-.deliver-btn:active {
-  transform: translate(2px,2px);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-}
-
-/* ── TOOL PANEL (slides from sidebar) ──────────────── */
-.tool-panel {
-  position: absolute;
-  left: 110px;
-  top: 0;
-  bottom: 0;
-  width: 210px;
-  background: rgba(5,9,22,0.95);
-  border-right: 2px solid rgba(100,140,220,0.25);
-  padding: 16px 12px;
-  z-index: 25;
-  transform: translateX(-100%);
-  transition: transform 0.28s cubic-bezier(0.25,0.46,0.45,0.94);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-shadow: 6px 0 20px rgba(0,0,0,0.7);
-  overflow-y: auto;
-}
-
-.tool-panel.open {
-  transform: translateX(0);
-}
-
-.tool-panel-header {
-  font-size: 8px;
-  color: var(--orange);
-  letter-spacing: 2px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgba(251,107,60,0.3);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tool-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 8px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.02);
-  font-size: 7px;
-  color: #7090b0;
-  transition: all 0.1s;
-  margin-bottom: 4px;
-  position: relative;
-}
-
-.tool-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--orange);
-  opacity: 0;
-  transition: opacity 0.1s;
-}
-
-.tool-item:hover {
-  background: rgba(251,107,60,0.08);
-  color: #fff;
-  border-color: rgba(251,107,60,0.3);
-}
-
-.tool-item:hover::before { opacity: 1; }
-
-.tool-sep {
-  height: 1px;
-  background: rgba(255,255,255,0.07);
-  margin: 6px 0;
-}
-
-.prog-label {
-  font-size: 6.5px;
-  color: #5070a0;
-  margin-bottom: 3px;
-  letter-spacing: 1px;
-}
-
-.prog-bar {
-  height: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  margin-bottom: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.prog-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  background: linear-gradient(90deg, #00b248, #00e676);
-  box-shadow: 0 0 8px rgba(0,230,118,0.5);
-  transition: width 0.6s;
-}
-
-/* ── HEADER BAR ─────────────────────────────────────── */
-.ws-header {
-  position: absolute;
-  top: 0;
-  left: 110px;
-  right: 0;
-  height: 48px;
-  background: rgba(4,7,18,0.94);
-  border-bottom: 2px solid rgba(251,107,60,0.3);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  z-index: 20;
-  gap: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.7);
-}
-
-.header-tag {
-  font-size: 7px;
-  letter-spacing: 1px;
-}
-
-.header-tag .tag-label {
-  color: rgba(255,255,255,0.35);
-}
-
-.header-tag .tag-value {
-  color: var(--cyan);
-}
-
-.header-sep {
-  width: 1px;
-  height: 24px;
-  background: rgba(255,255,255,0.1);
-}
-
-.star-row { display: flex; gap: 3px; }
-.star-filled { color: var(--yellow); font-size: 12px; }
-.star-empty  { color: rgba(255,255,255,0.15); font-size: 12px; }
-
-/* ── SHIP ICONS (hotspots over the ship) ─────────────── */
-.ship-icons-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-}
-
-/* ── SHIP ICON HOTSPOTS ─────────────────────────────── */
-.ship-icon {
-  position: absolute;
-  width: 9.8%;
-  height: 23%;
-  cursor: pointer;
-  pointer-events: all;
-  background: transparent;
-  border: 3px solid transparent;
-  border-radius: 6px;
-  font-size: 0;
-  color: transparent;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-}
-
-/* Hover sutil — mostra que é clicável sem revelar a zona */
-.icon-wrench:hover  { border-color:rgba(255,144,96,0.45);  box-shadow:0 0 18px rgba(251,107,60,0.4); }
-.icon-bolt:hover    { border-color:rgba(245,224,96,0.45);  box-shadow:0 0 18px rgba(245,197,24,0.4); }
-.icon-monitor:hover { border-color:rgba(96,240,160,0.45);  box-shadow:0 0 18px rgba(0,230,118,0.4); }
-.icon-robot:hover   { border-color:rgba(255,96,96,0.45);   box-shadow:0 0 18px rgba(244,67,54,0.4); }
-.icon-rocket:hover  { border-color:rgba(112,184,255,0.45); box-shadow:0 0 18px rgba(66,165,245,0.4); }
-
-/* Estado selecionado — glow pulsante colorido */
-.icon-wrench.selected  { border-color:#ff9060; background:rgba(251,107,60,0.13); box-shadow:0 0 28px rgba(251,107,60,0.9),0 0 8px rgba(251,107,60,0.5) inset; animation:selPulse-orange 1.3s ease-in-out infinite; }
-.icon-bolt.selected    { border-color:#f5e060; background:rgba(245,197,24,0.13); box-shadow:0 0 28px rgba(245,197,24,0.95),0 0 8px rgba(245,197,24,0.5) inset; animation:selPulse-yellow 1.3s ease-in-out infinite; }
-.icon-monitor.selected { border-color:#60f0a0; background:rgba(0,230,118,0.13); box-shadow:0 0 28px rgba(0,230,118,0.9),0 0 8px rgba(0,230,118,0.5) inset;  animation:selPulse-green  1.3s ease-in-out infinite; }
-.icon-robot.selected   { border-color:#ff6060; background:rgba(244,67,54,0.13);  box-shadow:0 0 28px rgba(244,67,54,0.9),0 0 8px rgba(244,67,54,0.5) inset;   animation:selPulse-red    1.3s ease-in-out infinite; }
-.icon-rocket.selected  { border-color:#70b8ff; background:rgba(66,165,245,0.13); box-shadow:0 0 28px rgba(66,165,245,0.9),0 0 8px rgba(66,165,245,0.5) inset; animation:selPulse-blue   1.3s ease-in-out infinite; }
-
-@keyframes selPulse-orange { 0%,100%{box-shadow:0 0 22px rgba(251,107,60,0.7) } 50%{box-shadow:0 0 40px rgba(251,107,60,1),0 0 12px rgba(255,180,120,0.6) inset} }
-@keyframes selPulse-yellow { 0%,100%{box-shadow:0 0 22px rgba(245,197,24,0.7) } 50%{box-shadow:0 0 40px rgba(245,197,24,1),0 0 12px rgba(255,240,120,0.6) inset} }
-@keyframes selPulse-green  { 0%,100%{box-shadow:0 0 22px rgba(0,230,118,0.7)  } 50%{box-shadow:0 0 40px rgba(0,230,118,1), 0 0 12px rgba(100,255,180,0.6) inset} }
-@keyframes selPulse-red    { 0%,100%{box-shadow:0 0 22px rgba(244,67,54,0.7)  } 50%{box-shadow:0 0 40px rgba(244,67,54,1), 0 0 12px rgba(255,130,120,0.6) inset} }
-@keyframes selPulse-blue   { 0%,100%{box-shadow:0 0 22px rgba(66,165,245,0.7) } 50%{box-shadow:0 0 40px rgba(66,165,245,1),0 0 12px rgba(150,210,255,0.6) inset} }
-
-.icon-tooltip { display:none; }
-
-/* ── SIDEBAR ACTIVE UPGRADE ─────────────────────────── */
-.sb-btn.active {
-  border-color: var(--orange);
-  background: rgba(251,107,60,0.18);
-  color: var(--orange);
-  animation: sbPulse 1.3s ease-in-out infinite;
-}
-@keyframes sbPulse {
-  0%,100% { box-shadow:0 0 16px rgba(251,107,60,0.4),inset 0 0 10px rgba(251,107,60,0.08); }
-  50%     { box-shadow:0 0 32px rgba(251,107,60,0.85),inset 0 0 18px rgba(251,107,60,0.18); }
-}
-
-/* ── DELIVER BTN UPGRADE ─────────────────────────────── */
-.deliver-btn {
-  animation: deliverGlow 2s ease-in-out infinite !important;
-}
-@keyframes deliverGlow {
-  0%,100% { box-shadow:0 0 20px rgba(251,107,60,0.6),5px 5px 0 rgba(0,0,0,0.8),inset 0 2px 0 rgba(255,150,80,0.3); transform:scale(1); }
-  50%     { box-shadow:0 0 40px rgba(251,107,60,1),  5px 5px 0 rgba(0,0,0,0.8),inset 0 2px 0 rgba(255,180,100,0.5); transform:scale(1.03); }
-}
-
-/* ── PANEL SLIDE UPGRADE ─────────────────────────────── */
-.tool-panel {
-  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
-}
-
-/* ── HEADER GLOW TAGS ────────────────────────────────── */
-.tag-value {
-  text-shadow: 0 0 8px currentColor;
-}
-
-/* ── PROGRESS BAR SHIMMER ────────────────────────────── */
-.prog-fill::after {
-  content:'';
+html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#000;font-family:var(--font);}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;transition:opacity 0.6s ease;}
+.screen.hidden{opacity:0;pointer-events:none;}
+.bg-cover-img{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;}
+.scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:2;}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.72) 100%);pointer-events:none;z-index:3;}
+
+/* ── SCREEN 1 MENU ── */
+#screen-menu{align-items:center;justify-content:flex-end;}
+#bg-menu{background-image:url('web-assets/bg1.jpg');background-color:#0d1420;}
+.menu-panel{position:relative;z-index:10;display:flex;flex-direction:column;align-items:flex-start;padding:40px;margin-right:60px;gap:0;background:rgba(4,8,20,0.82);border:3px solid rgba(0,245,255,0.2);border-left:4px solid var(--cyan);box-shadow:8px 8px 0 rgba(0,0,0,0.8),0 0 40px rgba(0,245,255,0.08),inset 0 0 30px rgba(0,0,0,0.3);min-width:320px;}
+.game-logo{font-size:26px;color:var(--cyan);text-shadow:3px 3px 0 #003a5a,0 0 20px rgba(0,245,255,0.6),0 0 40px rgba(0,245,255,0.3);letter-spacing:4px;margin-bottom:4px;line-height:1.3;}
+.game-sub{font-size:7px;color:rgba(160,200,255,0.6);letter-spacing:2px;margin-bottom:32px;margin-top:2px;}
+.menu-divider{width:100%;height:2px;background:linear-gradient(90deg,var(--cyan),transparent);margin-bottom:28px;opacity:0.4;}
+.menu-btn{font-family:var(--font);font-size:10px;letter-spacing:2px;background:rgba(8,15,35,0.9);border:2px solid rgba(0,245,255,0.25);border-left:4px solid rgba(0,245,255,0.6);color:#9ac8f0;padding:14px 28px;cursor:pointer;width:100%;text-align:left;box-shadow:4px 4px 0 rgba(0,0,0,0.8);transition:all 0.08s;margin-bottom:8px;position:relative;display:flex;align-items:center;gap:12px;}
+.menu-btn::before{content:'▸';color:var(--cyan);font-size:10px;opacity:0.5;transition:opacity 0.1s;}
+.menu-btn:hover{background:rgba(0,245,255,0.1);border-color:var(--cyan);color:#fff;box-shadow:6px 6px 0 rgba(0,0,0,0.8),0 0 18px rgba(0,245,255,0.25);transform:translateX(6px);}
+.menu-btn:hover::before{opacity:1;}
+.menu-btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 rgba(0,0,0,0.8);}
+.menu-version{position:absolute;bottom:16px;right:20px;font-size:7px;color:rgba(255,255,255,0.2);z-index:10;}
+#stars-canvas{position:absolute;inset:0;z-index:1;}
+
+/* ── SCREEN 2 WORKSHOP ── */
+#screen-workshop{flex-direction:row;}
+#bg-workshop{background-image:url('web-assets/bg2.jpg');background-color:#0d1015;}
+
+/* ── SIDEBAR ── */
+.sidebar{position:relative;z-index:30;width:110px;flex-shrink:0;background:rgba(5,8,20,0.96);border-right:3px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 6px;gap:6px;box-shadow:6px 0 24px rgba(0,0,0,0.9),inset -4px 0 12px rgba(0,0,0,0.5);}
+.sidebar-logo{font-size:7px;color:var(--orange);letter-spacing:1px;padding:6px 4px 10px;text-align:center;border-bottom:2px solid rgba(251,107,60,0.3);width:100%;line-height:1.6;}
+.sidebar-logo span{display:block;font-size:11px;color:var(--cyan);letter-spacing:3px;}
+.sb-btn{width:94px;height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;border:3px solid rgba(80,100,160,0.35);background:rgba(12,18,40,0.9);transition:all 0.1s;font-size:7px;color:#6080a0;letter-spacing:1px;text-transform:uppercase;position:relative;overflow:hidden;}
+.sb-btn:hover{background:rgba(25,38,80,0.95);border-color:var(--orange);color:#eee;box-shadow:0 0 16px rgba(251,107,60,0.35),inset 0 0 12px rgba(251,107,60,0.08);}
+.sb-btn.active{border-color:var(--orange);background:rgba(251,107,60,0.18);color:var(--orange);animation:sbPulse 1.3s ease-in-out infinite;}
+@keyframes sbPulse{0%,100%{box-shadow:0 0 16px rgba(251,107,60,0.4),inset 0 0 10px rgba(251,107,60,0.08);}50%{box-shadow:0 0 32px rgba(251,107,60,0.85),inset 0 0 18px rgba(251,107,60,0.18);}}
+.sb-btn .sb-icon{font-size:26px;line-height:1;filter:drop-shadow(0 0 4px currentColor);}
+.sb-btn .sb-label{font-size:6.5px;letter-spacing:1.5px;}
+.sb-separator{width:80%;height:1px;background:rgba(255,255,255,0.08);}
+.deliver-btn{width:94px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;margin-top:auto;border:3px solid #ff7a45;background:linear-gradient(180deg,#c94e1a 0%,#8a2800 100%);color:#ffe8d0;font-family:var(--font);font-size:6.5px;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 0 20px rgba(251,107,60,0.6),5px 5px 0 rgba(0,0,0,0.8),inset 0 2px 0 rgba(255,150,80,0.3);text-shadow:1px 1px 0 rgba(0,0,0,0.8);transition:all 0.1s;animation:deliverGlow 2s ease-in-out infinite;position:relative;}
+.deliver-btn .deliver-icon{font-size:22px;filter:drop-shadow(0 0 6px #ff9060);}
+.deliver-btn .deliver-label{text-align:center;line-height:1.6;}
+@keyframes deliverGlow{0%,100%{box-shadow:0 0 20px rgba(251,107,60,0.6),5px 5px 0 rgba(0,0,0,0.8),inset 0 2px 0 rgba(255,150,80,0.3);transform:scale(1);}50%{box-shadow:0 0 40px rgba(251,107,60,1),5px 5px 0 rgba(0,0,0,0.8),inset 0 2px 0 rgba(255,180,100,0.5);transform:scale(1.03);}}
+.deliver-btn:hover{background:linear-gradient(180deg,#fb6b3c 0%,#b03800 100%);border-color:#ffa070;transform:translate(-2px,-2px);box-shadow:0 0 40px rgba(251,107,60,0.9),8px 8px 0 rgba(0,0,0,0.8);}
+.deliver-btn:active{transform:translate(2px,2px);}
+
+/* ── TOOL PANEL ── */
+.tool-panel{position:absolute;left:110px;top:0;bottom:0;width:210px;background:rgba(5,9,22,0.95);border-right:2px solid rgba(100,140,220,0.25);padding:16px 12px;z-index:25;transform:translateX(-100%);transition:transform 0.22s cubic-bezier(0.22,1,0.36,1);display:flex;flex-direction:column;gap:0;box-shadow:6px 0 20px rgba(0,0,0,0.7);overflow-y:auto;}
+.tool-panel.open{transform:translateX(0);}
+.tool-panel-header{font-size:8px;color:var(--orange);letter-spacing:2px;padding-bottom:10px;border-bottom:2px solid rgba(251,107,60,0.3);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.tool-item{display:flex;align-items:center;gap:10px;padding:10px 8px;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);font-size:7px;color:#7090b0;transition:all 0.1s;margin-bottom:4px;position:relative;}
+.tool-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--orange);opacity:0;transition:opacity 0.1s;}
+.tool-item:hover{background:rgba(251,107,60,0.08);color:#fff;border-color:rgba(251,107,60,0.3);}
+.tool-item:hover::before{opacity:1;}
+.tool-sep{height:1px;background:rgba(255,255,255,0.07);margin:6px 0;}
+.prog-label{font-size:6.5px;color:#5070a0;margin-bottom:3px;letter-spacing:1px;}
+.prog-bar{height:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);margin-bottom:10px;position:relative;overflow:hidden;}
+.prog-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#00b248,#00e676);box-shadow:0 0 8px rgba(0,230,118,0.5);transition:width 0.6s;}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.35) 50%,transparent 100%);animation:shimmer 2s ease-in-out infinite;background-size:200% 100%;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── HEADER BAR ── */
+.ws-header{position:absolute;top:0;left:110px;right:0;height:48px;background:rgba(4,7,18,0.94);border-bottom:2px solid rgba(251,107,60,0.3);display:flex;align-items:center;padding:0 20px;z-index:20;gap:20px;box-shadow:0 4px 16px rgba(0,0,0,0.7);}
+.header-tag{font-size:7px;letter-spacing:1px;}
+.header-tag .tag-label{color:rgba(255,255,255,0.35);}
+.header-tag .tag-value{color:var(--cyan);text-shadow:0 0 8px currentColor;}
+.header-sep{width:1px;height:24px;background:rgba(255,255,255,0.1);}
+.star-row{display:flex;gap:3px;}
+.star-filled{color:var(--yellow);font-size:12px;}
+.star-empty{color:rgba(255,255,255,0.15);font-size:12px;}
+
+/* ── SHIP ICON HOTSPOTS ── */
+.ship-icons-layer{position:absolute;inset:0;z-index:15;pointer-events:none;}
+.ship-icon{position:absolute;width:9.8%;height:23%;cursor:pointer;pointer-events:all;background:transparent;border:3px solid transparent;border-radius:6px;font-size:0;color:transparent;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;}
+.icon-wrench:hover  {border-color:rgba(255,144,96,0.5); box-shadow:0 0 18px rgba(251,107,60,0.45);}
+.icon-bolt:hover    {border-color:rgba(245,224,96,0.5); box-shadow:0 0 18px rgba(245,197,24,0.45);}
+.icon-monitor:hover {border-color:rgba(96,240,160,0.5); box-shadow:0 0 18px rgba(0,230,118,0.45);}
+.icon-robot:hover   {border-color:rgba(255,96,96,0.5);  box-shadow:0 0 18px rgba(244,67,54,0.45);}
+.icon-rocket:hover  {border-color:rgba(112,184,255,0.5);box-shadow:0 0 18px rgba(66,165,245,0.45);}
+.icon-wrench.selected  {border-color:#ff9060;background:rgba(251,107,60,0.13);animation:selO 1.3s ease-in-out infinite;}
+.icon-bolt.selected    {border-color:#f5e060;background:rgba(245,197,24,0.13);animation:selY 1.3s ease-in-out infinite;}
+.icon-monitor.selected {border-color:#60f0a0;background:rgba(0,230,118,0.13); animation:selG 1.3s ease-in-out infinite;}
+.icon-robot.selected   {border-color:#ff6060;background:rgba(244,67,54,0.13); animation:selR 1.3s ease-in-out infinite;}
+.icon-rocket.selected  {border-color:#70b8ff;background:rgba(66,165,245,0.13);animation:selB 1.3s ease-in-out infinite;}
+@keyframes selO{0%,100%{box-shadow:0 0 22px rgba(251,107,60,0.7);}50%{box-shadow:0 0 40px rgba(251,107,60,1),0 0 12px rgba(255,180,120,0.6) inset;}}
+@keyframes selY{0%,100%{box-shadow:0 0 22px rgba(245,197,24,0.7); }50%{box-shadow:0 0 40px rgba(245,197,24,1), 0 0 12px rgba(255,240,120,0.6) inset;}}
+@keyframes selG{0%,100%{box-shadow:0 0 22px rgba(0,230,118,0.7);  }50%{box-shadow:0 0 40px rgba(0,230,118,1),  0 0 12px rgba(100,255,180,0.6) inset;}}
+@keyframes selR{0%,100%{box-shadow:0 0 22px rgba(244,67,54,0.7);  }50%{box-shadow:0 0 40px rgba(244,67,54,1),  0 0 12px rgba(255,130,120,0.6) inset;}}
+@keyframes selB{0%,100%{box-shadow:0 0 22px rgba(66,165,245,0.7); }50%{box-shadow:0 0 40px rgba(66,165,245,1), 0 0 12px rgba(150,210,255,0.6) inset;}}
+.icon-tooltip{display:none;}
+
+/* ── NPC ── */
+.npc-area{
   position:absolute;
-  inset:0;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.35) 50%,transparent 100%);
-  animation:shimmer 2s ease-in-out infinite;
-  background-size:200% 100%;
+  bottom:0;
+  left:114px;
+  z-index:22;
+  width:380px;         /* contém imagem + espaço para o balão */
+  pointer-events:none;
 }
-@keyframes shimmer {
-  0%  { background-position:200% 0; }
-  100%{ background-position:-200% 0; }
+.npc-wrapper{
+  position:relative;
+  display:inline-block;
 }
-
-/* ── NPC BUBBLE TYPING CURSOR ────────────────────────── */
-.speech-bubble::after {
-  content:'';
+.speech-bubble{
   position:absolute;
-  bottom:-16px;
-  left:20px;
-  border:8px solid transparent;
+  bottom:478px;        /* acima da cabeça: altura_img(541) - head_from_top(97) + margem(34) */
+  left:10px;
+  background:rgba(220,235,255,0.96);
+  border:4px solid #1a2a4a;
+  border-radius:5px;
+  padding:13px 18px;
+  min-width:230px;
+  max-width:280px;
+  font-size:8px;
+  color:#1a1a2e;
+  line-height:2;
+  box-shadow:5px 5px 0 rgba(0,0,0,0.7);
+  animation:bubbleWobble 4s ease-in-out infinite;
+  transition:opacity 0.3s,transform 0.3s;
+  white-space:pre-wrap;
+}
+@keyframes bubbleWobble{0%,100%{transform:rotate(-0.5deg);}50%{transform:rotate(0.5deg);}}
+/* seta aponta para baixo (cabeça do NPC) */
+.speech-bubble::after{
+  content:'';position:absolute;
+  top:100%;left:32px;
+  border:10px solid transparent;
   border-top-color:#1a2a4a;
 }
-.speech-bubble::before {
-  content:'';
-  position:absolute;
-  bottom:-11px;
-  left:22px;
-  border:6px solid transparent;
+.speech-bubble::before{
+  content:'';position:absolute;
+  top:100%;left:35px;
+  border:7px solid transparent;
   border-top-color:rgba(220,235,255,0.96);
   z-index:1;
 }
-
-/* ── NPC MECHANIC ────────────────────────────────────── */
-.npc-area {
-  position: absolute;
-  bottom: 0;
-  left: 114px;
-  z-index: 22;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-left: 8px;
-  padding-bottom: 0;
-  pointer-events: none;
+.npc-img{
+  height:541px;        /* 416px × 1.30 */
+  width:auto;
+  display:block;
+  object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(2px 4px 10px rgba(0,0,0,0.85));
+  animation:npcIdle 2.5s ease-in-out infinite;
 }
+@keyframes npcIdle{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
 
-.speech-bubble {
-  background: rgba(220,235,255,0.96);
-  border: 3px solid #1a2a4a;
-  border-radius: 4px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  min-width: 180px;
-  max-width: 220px;
-  font-size: 6.5px;
-  color: #1a1a2e;
-  line-height: 2;
-  position: relative;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
-  animation: bubbleWobble 4s ease-in-out infinite;
-  transition: opacity 0.4s;
-}
+/* ── PARTICLES / OVERLAY ── */
+#pfx-canvas{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+#transition-overlay{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:99999;transition:opacity 0.4s;}
+.toast{position:fixed;bottom:30px;right:30px;font-size:8px;color:#fff;background:rgba(5,9,22,0.96);border:2px solid var(--orange);padding:12px 18px;z-index:10000;box-shadow:4px 4px 0 rgba(0,0,0,0.8),0 0 20px rgba(251,107,60,0.4);letter-spacing:1.5px;opacity:0;transform:translateY(20px);transition:opacity 0.3s,transform 0.3s;}
+.toast.show{opacity:1;transform:translateY(0);}
 
-@keyframes bubbleWobble {
-  0%,100% { transform: rotate(-0.5deg); }
-  50%      { transform: rotate(0.5deg); }
-}
+/* ══════════════════════════════════════
+   MINI-GAME MODAL
+══════════════════════════════════════ */
+#mg-overlay{position:fixed;inset:0;background:rgba(2,5,15,0.88);z-index:50000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+#mg-overlay.open{opacity:1;pointer-events:all;}
+#mg-box{background:#070d1a;border:4px solid var(--orange);box-shadow:0 0 60px rgba(251,107,60,0.4),0 0 120px rgba(251,107,60,0.15),8px 8px 0 rgba(0,0,0,0.8);padding:0;width:600px;max-width:92vw;position:relative;animation:mgIn 0.25s cubic-bezier(0.22,1,0.36,1);}
+@keyframes mgIn{from{transform:scale(0.88) translateY(24px);}to{transform:scale(1) translateY(0);}}
+#mg-header{background:rgba(251,107,60,0.12);border-bottom:2px solid rgba(251,107,60,0.35);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+#mg-title{font-size:9px;color:var(--orange);letter-spacing:3px;}
+#mg-close{font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0 4px;transition:color 0.1s;}
+#mg-close:hover{color:#fff;}
+#mg-body{padding:18px;min-height:320px;display:flex;flex-direction:column;gap:10px;}
+#mg-score-bar{height:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);margin-bottom:4px;position:relative;overflow:hidden;}
+#mg-score-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width 0.4s;box-shadow:0 0 8px var(--cyan);}
+#mg-info{font-size:6.5px;color:#5080a0;display:flex;justify-content:space-between;margin-bottom:10px;letter-spacing:1px;}
+#mg-arena{flex:1;position:relative;min-height:240px;}
+#mg-result{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;}
+#mg-result .res-title{font-size:12px;letter-spacing:3px;}
+#mg-result .res-sub{font-size:7px;color:#7090b0;line-height:2;}
+#mg-result .res-btn{font-family:var(--font);font-size:8px;background:rgba(251,107,60,0.2);border:2px solid var(--orange);color:#fff;padding:10px 24px;cursor:pointer;letter-spacing:2px;transition:all 0.1s;}
+#mg-result .res-btn:hover{background:rgba(251,107,60,0.4);}
 
-.speech-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -16px;
-  left: 20px;
-  border: 8px solid transparent;
-  border-top-color: #1a2a4a;
-}
+/* ── MINI-GAME: BOLT TIGHTEN (wrench) ── */
+.bolt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:8px;}
+.bolt-item{width:60px;height:60px;border:3px solid rgba(255,144,96,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;background:rgba(251,107,60,0.08);transition:all 0.15s;position:relative;overflow:hidden;}
+.bolt-item.spinning{animation:boltSpin 0.6s linear infinite;}
+.bolt-item.done{border-color:var(--green);background:rgba(0,230,118,0.15);animation:none;cursor:default;}
+.bolt-item.done::after{content:'✓';position:absolute;font-size:10px;color:var(--green);font-family:var(--font);}
+@keyframes boltSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 
-.speech-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -11px;
-  left: 22px;
-  border: 6px solid transparent;
-  border-top-color: rgba(220,235,255,0.96);
-  z-index: 1;
-}
+/* ── MINI-GAME: WIRE CONNECT (bolt/energia) ── */
+.wire-grid{display:flex;justify-content:space-between;align-items:stretch;gap:10px;padding:8px;}
+.wire-col{display:flex;flex-direction:column;gap:12px;}
+.wire-node{width:52px;height:52px;border:3px solid;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;font-family:var(--font);}
+.wire-node.connected{opacity:0.5;cursor:default;}
+.wire-node.selected{box-shadow:0 0 14px currentColor;transform:scale(1.1);}
+.wire-canvas{position:absolute;inset:0;pointer-events:none;}
 
-.npc-img {
-  height: 320px;
-  width: auto;
-  object-fit: contain;
-  image-rendering: pixelated;
-  filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.8));
-  animation: npcIdle 2.5s ease-in-out infinite;
-}
+/* ── MINI-GAME: SCAN GRID (monitor) ── */
+.scan-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:4px;}
+.scan-cell{height:28px;border:1px solid rgba(0,245,255,0.15);background:rgba(0,245,255,0.03);cursor:pointer;transition:all 0.12s;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.scan-cell.damaged{background:rgba(244,67,54,0.2);border-color:rgba(244,67,54,0.6);animation:dmgPulse 0.9s ease-in-out infinite;}
+.scan-cell.scanned{background:rgba(0,230,118,0.15);border-color:rgba(0,230,118,0.5);animation:none;cursor:default;}
+@keyframes dmgPulse{0%,100%{background:rgba(244,67,54,0.2);}50%{background:rgba(244,67,54,0.45);}}
 
-@keyframes npcIdle {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
-}
+/* ── MINI-GAME: PIECE MATCH (robot/peças) ── */
+.piece-arena{display:flex;gap:20px;padding:8px;}
+.piece-slots{display:flex;flex-direction:column;gap:12px;flex:1;}
+.piece-slot{height:52px;border:3px dashed rgba(255,255,255,0.2);border-radius:4px;display:flex;align-items:center;padding:0 12px;font-size:7px;color:#5070a0;letter-spacing:1px;cursor:pointer;transition:all 0.15s;gap:10px;}
+.piece-slot.highlight{border-color:var(--orange);background:rgba(251,107,60,0.08);}
+.piece-slot.filled{border-color:var(--green);border-style:solid;background:rgba(0,230,118,0.1);color:var(--green);cursor:default;}
+.piece-tray{display:flex;flex-direction:column;gap:12px;flex:1;}
+.piece-card{height:52px;border:2px solid rgba(100,140,220,0.4);border-radius:4px;display:flex;align-items:center;padding:0 10px;font-size:7px;color:#8090c0;letter-spacing:1px;cursor:pointer;transition:all 0.15s;gap:8px;background:rgba(10,18,45,0.8);}
+.piece-card:hover{border-color:var(--orange);color:#fff;}
+.piece-card.selected{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,0.4);}
+.piece-card.used{opacity:0.25;pointer-events:none;}
 
-/* Fallback NPC (CSS pixel art character) when no image */
-.npc-fallback {
-  width: 80px;
-  height: 200px;
-  position: relative;
-  animation: npcIdle 2.5s ease-in-out infinite;
-}
-
-/* ═══════════════════════════════════════════════════════
-   PARTICLE CANVAS
-═══════════════════════════════════════════════════════ */
-#pfx-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* ═══════════════════════════════════════════════════════
-   TRANSITION OVERLAY
-═══════════════════════════════════════════════════════ */
-#transition-overlay {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 99999;
-  transition: opacity 0.4s;
-}
-
-/* ═══════════════════════════════════════════════════════
-   NOTIFICATION TOAST
-═══════════════════════════════════════════════════════ */
-.toast {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  font-size: 8px;
-  color: #fff;
-  background: rgba(5,9,22,0.96);
-  border: 2px solid var(--orange);
-  padding: 12px 18px;
-  z-index: 10000;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.8), 0 0 20px rgba(251,107,60,0.4);
-  letter-spacing: 1.5px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ═══════════════════════════════════════════════════════
-   PIXEL CURSOR (optional pixel feel)
-═══════════════════════════════════════════════════════ */
-button, .sb-btn, .ship-icon, .deliver-btn, .menu-btn, .tool-item {
-  cursor: pointer;
-}
-
-/* Scrollbar for tool panel */
-.tool-panel::-webkit-scrollbar { width: 4px; }
-.tool-panel::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-.tool-panel::-webkit-scrollbar-thumb { background: rgba(251,107,60,0.4); }
+/* ── MINI-GAME: THRUSTER TIMING (rocket) ── */
+.thruster-arena{display:flex;flex-direction:column;gap:18px;padding:8px;}
+.thruster-row{display:flex;align-items:center;gap:14px;}
+.thruster-label{font-size:7px;color:#7090b0;width:60px;letter-spacing:1px;}
+.thruster-track{flex:1;height:32px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;position:relative;overflow:hidden;}
+.thruster-zone{position:absolute;top:0;bottom:0;background:rgba(0,230,118,0.25);border-left:2px solid var(--green);border-right:2px solid var(--green);}
+.thruster-bar{position:absolute;top:4px;bottom:4px;width:12px;background:var(--cyan);border-radius:2px;box-shadow:0 0 8px var(--cyan);transition:left 0.016s linear;}
+.thruster-lock{font-family:var(--font);font-size:7px;background:rgba(251,107,60,0.15);border:2px solid var(--orange);color:var(--orange);padding:6px 10px;cursor:pointer;letter-spacing:1px;white-space:nowrap;transition:all 0.1s;}
+.thruster-lock:hover{background:rgba(251,107,60,0.3);}
+.thruster-lock.ok{border-color:var(--green);color:var(--green);background:rgba(0,230,118,0.15);pointer-events:none;}
+.thruster-lock.miss{border-color:var(--red);color:var(--red);animation:shake 0.3s ease-in-out;pointer-events:none;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     PARTICLE / EFFECT CANVAS
-════════════════════════════════════════════════════ -->
 <canvas id="pfx-canvas"></canvas>
-
-<!-- ═══════════════════════════════════════════════════
-     TRANSITION OVERLAY
-════════════════════════════════════════════════════ -->
 <div id="transition-overlay"></div>
 
-<!-- ═══════════════════════════════════════════════════
-     SCREEN 1 — MAIN MENU
-════════════════════════════════════════════════════ -->
+<!-- MINI-GAME MODAL -->
+<div id="mg-overlay">
+  <div id="mg-box">
+    <div id="mg-header">
+      <span id="mg-title">MINI-GAME</span>
+      <button id="mg-close" onclick="closeMiniGame()">✕ FECHAR</button>
+    </div>
+    <div id="mg-body">
+      <div id="mg-score-bar"><div id="mg-score-fill" style="width:0%"></div></div>
+      <div id="mg-info">
+        <span id="mg-label">—</span>
+        <span id="mg-timer">—</span>
+      </div>
+      <div id="mg-arena"></div>
+      <div id="mg-result">
+        <div class="res-title" id="res-title">—</div>
+        <div class="res-sub" id="res-sub">—</div>
+        <button class="res-btn" onclick="closeMiniGame()">▸ CONTINUAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 1 — MENU -->
 <div id="screen-menu" class="screen">
-  <!-- Background -->
   <div id="bg-menu" class="bg-cover-img" style="z-index:0;"></div>
-  <!-- Stars canvas for fallback ambiance -->
   <canvas id="stars-canvas" style="z-index:1;pointer-events:none;"></canvas>
-  <!-- Dark gradient overlay so panel is readable -->
   <div style="position:absolute;inset:0;background:linear-gradient(100deg,rgba(4,8,20,0.7) 0%,rgba(4,8,20,0.1) 100%);z-index:2;pointer-events:none;"></div>
-  <!-- Scanlines + vignette -->
   <div class="scanlines" style="z-index:3;"></div>
   <div class="vignette"  style="z-index:4;"></div>
-
-  <!-- Menu panel (right side) -->
-  <div class="menu-panel" style="z-index:10; margin-left:auto;">
+  <div class="menu-panel" style="z-index:10;margin-left:auto;">
     <div class="game-logo">STELLAR<br>FIX</div>
     <div class="game-sub">O MECÂNICO DA GALÁXIA</div>
     <div class="menu-divider"></div>
     <button class="menu-btn" onclick="goWorkshop()">▸ JOGAR</button>
     <button class="menu-btn" onclick="showToast('SEM SAVE ENCONTRADO')">  CONTINUAR</button>
     <button class="menu-btn" onclick="showToast('EM BREVE...')">  CONFIGURAÇÕES</button>
-    <button class="menu-btn" onclick="showToast('STELLAR FIX  v0.1.0  •  PIXEL GAMES')">  CRÉDITOS</button>
+    <button class="menu-btn" onclick="showToast('STELLAR FIX  v0.2.0  •  PIXEL GAMES')">  CRÉDITOS</button>
   </div>
-
-  <!-- Version tag -->
-  <div class="menu-version">v0.1.0</div>
+  <div class="menu-version">v0.2.0</div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     SCREEN 2 — WORKSHOP
-════════════════════════════════════════════════════ -->
+<!-- SCREEN 2 — WORKSHOP -->
 <div id="screen-workshop" class="screen hidden">
-
-  <!-- Background full cover -->
   <div id="bg-workshop" class="bg-cover-img" style="z-index:0;"></div>
   <div class="scanlines" style="z-index:2;"></div>
   <div class="vignette"  style="z-index:3;"></div>
 
-  <!-- ── SIDEBAR ─────────────────────────────────── -->
+  <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sidebar-logo">
-      <span>S·FIX</span>
-      OFICINA
-    </div>
-
-    <!-- SCAN -->
-    <button class="sb-btn active" id="sb-scan" onclick="openPanel('scan',this)" title="Escanear nave">
-      <span class="sb-icon">🔍</span>
-      <span class="sb-label">SCAN</span>
+    <div class="sidebar-logo"><span>S·FIX</span>OFICINA</div>
+    <button class="sb-btn active" id="sb-scan"  onclick="openPanel('scan',this)"  title="Escanear nave">
+      <span class="sb-icon">🔍</span><span class="sb-label">SCAN</span>
     </button>
-
-    <!-- TOOLS -->
     <button class="sb-btn" id="sb-tools" onclick="openPanel('tools',this)" title="Ferramentas">
-      <span class="sb-icon">🔧</span>
-      <span class="sb-label">CHAVE</span>
+      <span class="sb-icon">🔧</span><span class="sb-label">CHAVE</span>
     </button>
-
-    <!-- PEÇAS -->
-    <button class="sb-btn" id="sb-pecas" onclick="openPanel('pecas',this)" title="Peças de reposição">
-      <span class="sb-icon">📦</span>
-      <span class="sb-label">PEÇAS</span>
+    <button class="sb-btn" id="sb-pecas" onclick="openPanel('pecas',this)" title="Peças">
+      <span class="sb-icon">📦</span><span class="sb-label">PEÇAS</span>
     </button>
-
-    <!-- TINTA -->
-    <button class="sb-btn" id="sb-tinta" onclick="openPanel('tinta',this)" title="Pintura e acabamentos">
-      <span class="sb-icon">🎨</span>
-      <span class="sb-label">TINTA</span>
+    <button class="sb-btn" id="sb-tinta" onclick="openPanel('tinta',this)" title="Pintura">
+      <span class="sb-icon">🎨</span><span class="sb-label">TINTA</span>
     </button>
-
-    <!-- SISTEMAS -->
-    <button class="sb-btn" id="sb-sys" onclick="openPanel('sys',this)" title="Sistemas elétricos">
-      <span class="sb-icon">⚡</span>
-      <span class="sb-label">SIST.</span>
+    <button class="sb-btn" id="sb-sys"   onclick="openPanel('sys',this)"   title="Sistemas">
+      <span class="sb-icon">⚡</span><span class="sb-label">SIST.</span>
     </button>
-
     <div class="sb-separator"></div>
-
-    <!-- ENTREGAR NAVE (botão destaque) -->
     <button class="deliver-btn" onclick="deliverShip()">
       <span class="deliver-icon">🚀</span>
       <span class="deliver-label">ENTREGAR<br>NAVE</span>
     </button>
-
-    <!-- Back to menu -->
     <button class="sb-btn" onclick="goMenu()" style="margin-top:6px;height:48px;min-height:48px;font-size:6px;border-color:rgba(100,100,160,0.3);">
-      <span style="font-size:14px;">◀</span>
-      <span class="sb-label" style="font-size:5.5px;">MENU</span>
+      <span style="font-size:14px;">◀</span><span class="sb-label" style="font-size:5.5px;">MENU</span>
     </button>
   </div>
 
-  <!-- ── TOOL PANEL (slide-in) ──────────────────── -->
+  <!-- TOOL PANEL -->
   <div class="tool-panel" id="tool-panel">
     <div class="tool-panel-header">
       <span id="panel-icon">🔍</span>
       <span id="panel-title">SCAN</span>
     </div>
-
-    <!-- Content swapped by JS -->
     <div id="panel-content"></div>
   </div>
 
-  <!-- ── HEADER BAR ──────────────────────────────── -->
+  <!-- HEADER BAR -->
   <div class="ws-header">
-    <div class="header-tag">
-      <span class="tag-label">NAVE  </span>
-      <span class="tag-value">SHUTTLE-7</span>
-    </div>
+    <div class="header-tag"><span class="tag-label">NAVE  </span><span class="tag-value">SHUTTLE-7</span></div>
     <div class="header-sep"></div>
-    <div class="header-tag">
-      <span class="tag-label">CLIENTE  </span>
-      <span class="tag-value">ZAX-47</span>
-    </div>
+    <div class="header-tag"><span class="tag-label">CLIENTE  </span><span class="tag-value">ZAX-47</span></div>
     <div class="header-sep"></div>
     <div class="header-tag" style="display:flex;align-items:center;gap:6px;">
       <span class="tag-label">AVALIAÇÃO</span>
       <div class="star-row">
-        <span class="star-filled">★</span>
-        <span class="star-filled">★</span>
-        <span class="star-filled">★</span>
-        <span class="star-empty">★</span>
-        <span class="star-empty">★</span>
+        <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+        <span class="star-empty">★</span><span class="star-empty">★</span>
       </div>
     </div>
     <div class="header-sep"></div>
-    <div class="header-tag">
-      <span class="tag-label">PRAZO  </span>
-      <span class="tag-value" id="timer-display" style="color:var(--yellow);">06:42</span>
-    </div>
-    <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <div class="header-tag"><span class="tag-label">PRAZO  </span><span class="tag-value" id="timer-display" style="color:var(--yellow);">06:42</span></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
       <span style="font-size:7px;color:rgba(255,255,255,0.3);letter-spacing:1px;">PROGRESSO</span>
       <div style="width:120px;" class="prog-bar">
-        <div class="prog-fill" id="main-prog" style="width:38%;"></div>
+        <div class="prog-fill" id="main-prog" style="width:0%;"></div>
       </div>
-      <span style="font-size:7px;color:var(--green);">38%</span>
+      <span style="font-size:7px;color:var(--green);" id="main-pct">0%</span>
     </div>
   </div>
 
-  <!-- ── SHIP ICON HOTSPOTS ─────────────────────── -->
-  <!-- These overlap the ship area in the background image -->
+  <!-- SHIP HOTSPOTS — invisible click zones over bg icons -->
   <div class="ship-icons-layer" style="top:48px;">
-
-    <!-- Wrench — sistema mecânico -->
-    <div class="ship-icon icon-wrench" style="top:32%; left:19.5%;"
-         onclick="selectIcon(this,'wrench',event); openPanel('tools', document.getElementById('sb-tools'));"></div>
-
-    <!-- Bolt — energia -->
-    <div class="ship-icon icon-bolt" style="top:12.5%; left:52%;"
-         onclick="selectIcon(this,'bolt',event); openPanel('sys', document.getElementById('sb-sys'));"></div>
-
-    <!-- Monitor — sistemas -->
-    <div class="ship-icon icon-monitor" style="top:33.5%; left:62%;"
-         onclick="selectIcon(this,'monitor',event); openPanel('scan', document.getElementById('sb-scan'));"></div>
-
-    <!-- Robot — peças -->
-    <div class="ship-icon icon-robot" style="top:56.5%; left:43%;"
-         onclick="selectIcon(this,'robot',event); openPanel('pecas', document.getElementById('sb-pecas'));"></div>
-
-    <!-- Rocket — propulsão -->
-    <div class="ship-icon icon-rocket" style="top:49%; left:79.5%;"
-         onclick="selectIcon(this,'rocket',event); openPanel('tinta', document.getElementById('sb-tinta'));"></div>
-
+    <!-- Wrench — mecânico (esq da nave) -->
+    <div class="ship-icon icon-wrench" style="top:32%;left:19.5%;"
+         onclick="selectIcon(this,'wrench',event);openPanel('tools',document.getElementById('sb-tools'));launchMiniGame('wrench');"></div>
+    <!-- Bolt — energia (topo centro) -->
+    <div class="ship-icon icon-bolt" style="top:12.5%;left:52%;"
+         onclick="selectIcon(this,'bolt',event);openPanel('sys',document.getElementById('sb-sys'));launchMiniGame('bolt');"></div>
+    <!-- Monitor — sistemas (dir centro) -->
+    <div class="ship-icon icon-monitor" style="top:33.5%;left:62%;"
+         onclick="selectIcon(this,'monitor',event);openPanel('scan',document.getElementById('sb-scan'));launchMiniGame('monitor');"></div>
+    <!-- Robot — peças (inferior centro) -->
+    <div class="ship-icon icon-robot" style="top:56.5%;left:43%;"
+         onclick="selectIcon(this,'robot',event);openPanel('pecas',document.getElementById('sb-pecas'));launchMiniGame('robot');"></div>
+    <!-- Rocket — propulsão (inf dir) -->
+    <div class="ship-icon icon-rocket" style="top:49%;left:79.5%;"
+         onclick="selectIcon(this,'rocket',event);openPanel('tinta',document.getElementById('sb-tinta'));launchMiniGame('rocket');"></div>
   </div>
 
-  <!-- ── NPC MECHANIC ───────────────────────────── -->
+  <!-- NPC -->
   <div class="npc-area">
-    <div class="speech-bubble" id="npc-bubble">
-      ESSA NAVE PRECISA<br>DE BASTANTE<br>ATENÇÃO, CHEFE!
-    </div>
-    <!-- Try real image, fallback to CSS sprite -->
-    <img class="npc-img" src="web-assets/npc.png"
-         alt="Mecânico"
-         onerror="this.style.display='none'; document.getElementById('npc-css').style.display='block';">
-    <!-- CSS pixel art NPC fallback -->
-    <div id="npc-css" style="display:none;">
-      <svg width="90" height="200" viewBox="0 0 18 40" style="image-rendering:pixelated;">
-        <!-- Goggles/helmet -->
-        <rect x="5" y="0" width="8" height="5" fill="#8B4513"/>
-        <rect x="4" y="1" width="10" height="4" fill="#A0522D"/>
-        <!-- Goggles lenses -->
-        <rect x="5" y="2" width="3" height="2" fill="#00bfff" opacity="0.9"/>
-        <rect x="10" y="2" width="3" height="2" fill="#00bfff" opacity="0.9"/>
-        <!-- Face -->
-        <rect x="5" y="5" width="8" height="7" fill="#D2A679"/>
-        <rect x="6" y="7" width="1" height="1" fill="#6B3E26"/>
-        <rect x="11" y="7" width="1" height="1" fill="#6B3E26"/>
-        <!-- Beard -->
-        <rect x="6" y="10" width="6" height="2" fill="#7B4F28"/>
-        <!-- Body / overalls -->
-        <rect x="3" y="12" width="12" height="14" fill="#1565C0"/>
-        <!-- Jacket -->
-        <rect x="3" y="12" width="5" height="14" fill="#E65100"/>
-        <!-- Belt -->
-        <rect x="3" y="24" width="12" height="2" fill="#5D4037"/>
-        <rect x="7" y="24" width="4" height="2" fill="#9E9E9E"/>
-        <!-- Legs -->
-        <rect x="4" y="26" width="4" height="8" fill="#1565C0"/>
-        <rect x="10" y="26" width="4" height="8" fill="#1565C0"/>
-        <!-- Boots -->
-        <rect x="3" y="34" width="5" height="4" fill="#4E342E"/>
-        <rect x="10" y="34" width="5" height="4" fill="#4E342E"/>
-        <!-- Wrench in hand -->
-        <rect x="15" y="16" width="2" height="8" fill="#9E9E9E"/>
-        <rect x="14" y="15" width="4" height="2" fill="#757575"/>
-        <!-- Pocket details -->
-        <rect x="11" y="15" width="3" height="3" fill="#0D47A1"/>
-        <rect x="11" y="16" width="3" height="1" fill="#1976D2"/>
-      </svg>
+    <div class="npc-wrapper">
+      <div class="speech-bubble" id="npc-bubble"></div>
+      <img class="npc-img" src="web-assets/npc.png" alt="Mecânico"
+           onerror="this.style.display='none';">
     </div>
   </div>
+</div>
 
-</div><!-- end screen-workshop -->
-
-<!-- ── TOAST NOTIFICATION ──────────────────────────── -->
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   STELLAR FIX — GAME UI JAVASCRIPT
-   Version 0.1.0
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   STELLAR FIX v0.2.0 — MINI-GAMES UPDATE
+═══════════════════════════════════════════════════ */
 
-// ── STARS BACKGROUND (fallback for menu) ─────────────
-(function initStars() {
-  const c   = document.getElementById('stars-canvas');
-  const ctx = c.getContext('2d');
-  let stars = [];
-
-  function resize() {
-    c.width  = window.innerWidth;
-    c.height = window.innerHeight;
-    stars = [];
-    for (let i = 0; i < 200; i++) {
-      stars.push({
-        x  : Math.random() * c.width,
-        y  : Math.random() * c.height,
-        r  : Math.random() * 1.5 + 0.3,
-        a  : Math.random(),
-        sp : Math.random() * 0.004 + 0.001,
-        vx : (Math.random() - 0.5) * 0.12,
-      });
-    }
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,c.width,c.height);
-    stars.forEach(s => {
-      s.a  += s.sp;
-      s.x  += s.vx;
-      if (s.x < 0)       s.x = c.width;
-      if (s.x > c.width) s.x = 0;
-      const alpha = (Math.sin(s.a) * 0.4 + 0.6);
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(180,220,255,${alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  draw();
+// ── STARS ─────────────────────────────────────────
+(function(){
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');let stars=[];
+  function resize(){c.width=innerWidth;c.height=innerHeight;stars=[];for(let i=0;i<200;i++)stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.5+0.3,a:Math.random(),sp:Math.random()*0.004+0.001,vx:(Math.random()-0.5)*0.12});}
+  function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.a+=s.sp;s.x+=s.vx;if(s.x<0)s.x=c.width;if(s.x>c.width)s.x=0;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(180,220,255,${Math.sin(s.a)*0.4+0.6})`;ctx.fill();});requestAnimationFrame(draw);}
+  addEventListener('resize',resize);resize();draw();
 })();
 
-// ── SCREEN TRANSITIONS ────────────────────────────────
-function fadeTransition(callback) {
-  const ov = document.getElementById('transition-overlay');
-  ov.style.pointerEvents = 'all';
-  ov.style.opacity = '1';
-  setTimeout(() => {
-    callback();
-    setTimeout(() => {
-      ov.style.opacity = '0';
-      setTimeout(() => { ov.style.pointerEvents = 'none'; }, 400);
-    }, 80);
-  }, 380);
+// ── TRANSITIONS ────────────────────────────────────
+function fadeTransition(cb){const ov=document.getElementById('transition-overlay');ov.style.pointerEvents='all';ov.style.opacity='1';setTimeout(()=>{cb();setTimeout(()=>{ov.style.opacity='0';setTimeout(()=>ov.style.pointerEvents='none',400);},80);},380);}
+function goWorkshop(){fadeTransition(()=>{document.getElementById('screen-menu').classList.add('hidden');document.getElementById('screen-workshop').classList.remove('hidden');startTimer();});}
+function goMenu(){fadeTransition(()=>{document.getElementById('screen-workshop').classList.add('hidden');document.getElementById('screen-menu').classList.remove('hidden');stopTimer();});}
+
+// ── TIMER ──────────────────────────────────────────
+let timerSecs=402,timerInterval=null;
+function startTimer(){stopTimer();timerInterval=setInterval(()=>{timerSecs=Math.max(0,timerSecs-1);const m=Math.floor(timerSecs/60),s=timerSecs%60,el=document.getElementById('timer-display');if(el){el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;el.style.color=timerSecs<60?'var(--red)':(timerSecs<120?'var(--orange)':'var(--yellow)');}},1000);}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
+
+// ── PROGRESS ───────────────────────────────────────
+let progress = 0;
+const mgProgress = {wrench:0,bolt:0,monitor:0,robot:0,rocket:0};
+
+function addProgress(key, pct){
+  mgProgress[key] = Math.max(mgProgress[key], pct);
+  progress = Math.round(Object.values(mgProgress).reduce((a,b)=>a+b,0) / 5);
+  const fill = document.getElementById('main-prog');
+  const lbl  = document.getElementById('main-pct');
+  if(fill) fill.style.width = progress+'%';
+  if(lbl)  lbl.textContent  = progress+'%';
 }
 
-function goWorkshop() {
-  fadeTransition(() => {
-    document.getElementById('screen-menu').classList.add('hidden');
-    document.getElementById('screen-workshop').classList.remove('hidden');
-    startTimer();
-  });
-}
-
-function goMenu() {
-  fadeTransition(() => {
-    document.getElementById('screen-workshop').classList.add('hidden');
-    document.getElementById('screen-menu').classList.remove('hidden');
-    stopTimer();
-  });
-}
-
-// ── TIMER ─────────────────────────────────────────────
-let timerSecs = 402;
-let timerInterval = null;
-
-function startTimer() {
-  stopTimer();
-  timerInterval = setInterval(() => {
-    timerSecs = Math.max(0, timerSecs - 1);
-    const m = Math.floor(timerSecs / 60);
-    const s = timerSecs % 60;
-    const el = document.getElementById('timer-display');
-    if (el) {
-      el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      el.style.color = timerSecs < 60 ? 'var(--red)' : (timerSecs < 120 ? 'var(--orange)' : 'var(--yellow)');
-    }
-  }, 1000);
-}
-
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-}
-
-// ── TOOL PANEL CONTENTS ───────────────────────────────
+// ── PANEL DATA ─────────────────────────────────────
 const panelData = {
-  scan: {
-    icon  : '🔍',
-    title : 'DIAGNÓSTICO',
-    html  : `
-      <div class="prog-label">CASCO EXTERNO</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:72%;background:linear-gradient(90deg,#42a5f5,#80d8ff);box-shadow:0 0 8px rgba(66,165,245,0.5);"></div></div>
-      <div class="prog-label">PROPULSORES</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:40%;background:linear-gradient(90deg,#f44336,#ff8a80);box-shadow:0 0 8px rgba(244,67,54,0.5);"></div></div>
-      <div class="prog-label">ESCUDOS</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:15%;background:linear-gradient(90deg,#f44336,#ff8a80);box-shadow:0 0 8px rgba(244,67,54,0.5);"></div></div>
-      <div class="prog-label">NÚCLEO ENERGIA</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:88%;background:linear-gradient(90deg,#00e676,#69f0ae);box-shadow:0 0 8px rgba(0,230,118,0.5);"></div></div>
-      <div class="tool-sep"></div>
-      <div class="tool-item" onclick="showToast('INICIANDO SCAN PROFUNDO...')"><span>📡</span><span>SCAN PROFUNDO</span></div>
-      <div class="tool-item" onclick="showToast('RELATÓRIO GERADO!')"><span>📋</span><span>GERAR RELATÓRIO</span></div>
-    `
-  },
-  tools: {
-    icon  : '🔧',
-    title : 'FERRAMENTAS',
-    html  : `
-      <div class="tool-item" onclick="showToast('CHAVE SELECIONADA')"><span>🔧</span><span>CHAVE INGLESA</span></div>
-      <div class="tool-item" onclick="showToast('SOLDA SELECIONADA')"><span>🔥</span><span>MAÇARICO</span></div>
-      <div class="tool-item" onclick="showToast('DRILL SELECIONADO')"><span>🔩</span><span>FURADEIRA</span></div>
-      <div class="tool-item" onclick="showToast('MARTELO SELECIONADO')"><span>🔨</span><span>MARTELO PLASMA</span></div>
-      <div class="tool-sep"></div>
-      <div class="tool-item" onclick="showToast('ANALISADOR ATIVO')"><span>📐</span><span>ANALISADOR</span></div>
-      <div class="tool-item" onclick="showToast('CALIBRADOR ATIVO')"><span>⚙️</span><span>CALIBRADOR</span></div>
-    `
-  },
-  pecas: {
-    icon  : '📦',
-    title : 'PEÇAS',
-    html  : `
-      <div class="tool-item" onclick="showToast('PLACA SELECIONADA')">
-        <span>🔲</span>
-        <div><div>PLACA DE TITÂNIO</div><div style="font-size:5.5px;color:var(--green);margin-top:2px;">x4 em estoque</div></div>
-      </div>
-      <div class="tool-item" onclick="showToast('MOTOR SELECIONADO')">
-        <span>⚙️</span>
-        <div><div>MOTOR ION MK-3</div><div style="font-size:5.5px;color:var(--yellow);margin-top:2px;">x1 em estoque</div></div>
-      </div>
-      <div class="tool-item" onclick="showToast('ESCUDO SELECIONADO')">
-        <span>🛡️</span>
-        <div><div>GERADOR ESCUDO</div><div style="font-size:5.5px;color:var(--red);margin-top:2px;">SEM ESTOQUE</div></div>
-      </div>
-      <div class="tool-item" onclick="showToast('CABO SELECIONADO')">
-        <span>🔌</span>
-        <div><div>CABO PLASMA</div><div style="font-size:5.5px;color:var(--green);margin-top:2px;">x12 em estoque</div></div>
-      </div>
-      <div class="tool-sep"></div>
-      <div class="tool-item" onclick="showToast('PEDIDO ENVIADO!')"><span>📤</span><span>ENCOMENDAR PEÇAS</span></div>
-    `
-  },
-  tinta: {
-    icon  : '🎨',
-    title : 'PINTURA',
-    html  : `
-      <div class="tool-item" onclick="applyPaint('#1565C0')"><span style="color:#42a5f5;">■</span><span>AZUL ESTELAR</span></div>
-      <div class="tool-item" onclick="applyPaint('#E65100')"><span style="color:#fb6b3c;">■</span><span>LARANJA NEBULA</span></div>
-      <div class="tool-item" onclick="applyPaint('#2E7D32')"><span style="color:#00e676;">■</span><span>VERDE ALIEN</span></div>
-      <div class="tool-item" onclick="applyPaint('#6A1B9A')"><span style="color:#ce93d8;">■</span><span>PÚRPURA VÓRTEX</span></div>
-      <div class="tool-item" onclick="applyPaint('#263238')"><span style="color:#90a4ae;">■</span><span>CINZA STEALTH</span></div>
-      <div class="tool-sep"></div>
-      <div class="tool-item" onclick="showToast('VERNIZ APLICADO!')"><span>✨</span><span>VERNIZ ESPACIAL</span></div>
-      <div class="tool-item" onclick="showToast('DECAL APLICADO!')"><span>🏷️</span><span>DECALQUES</span></div>
-    `
-  },
-  sys: {
-    icon  : '⚡',
-    title : 'SISTEMAS',
-    html  : `
-      <div class="tool-item" onclick="showToast('ENERGIA PRINCIPAL: 88%')">
-        <span>🔋</span>
-        <div><div>BATERIA PRINCIPAL</div><div style="font-size:5.5px;color:var(--green);margin-top:2px;">88% CARREGADA</div></div>
-      </div>
-      <div class="tool-item" onclick="showToast('SHIELD OFFLINE!')">
-        <span>🛡️</span>
-        <div><div>ESCUDOS</div><div style="font-size:5.5px;color:var(--red);margin-top:2px;">OFFLINE</div></div>
-      </div>
-      <div class="tool-item" onclick="showToast('NAVCOMP ATIVO')">
-        <span>🧭</span>
-        <div><div>NAVCOM</div><div style="font-size:5.5px;color:var(--yellow);margin-top:2px;">CALIBRANDO...</div></div>
-      </div>
-      <div class="tool-sep"></div>
-      <div class="tool-item" onclick="showToast('RESETANDO SISTEMAS...')"><span>🔄</span><span>RESET SISTEMAS</span></div>
-      <div class="tool-item" onclick="showToast('ATUALIZAÇÃO INSTALADA!')"><span>💾</span><span>ATUALIZAR FIRMWARE</span></div>
-    `
-  }
+  scan:{icon:'🔍',title:'DIAGNÓSTICO',html:`
+    <div class="prog-label">CASCO EXTERNO</div><div class="prog-bar"><div class="prog-fill" style="width:72%;background:linear-gradient(90deg,#42a5f5,#80d8ff);"></div></div>
+    <div class="prog-label">PROPULSORES</div><div class="prog-bar"><div class="prog-fill" style="width:40%;background:linear-gradient(90deg,#f44336,#ff8a80);"></div></div>
+    <div class="prog-label">ESCUDOS</div><div class="prog-bar"><div class="prog-fill" style="width:15%;background:linear-gradient(90deg,#f44336,#ff8a80);"></div></div>
+    <div class="prog-label">NÚCLEO ENERGIA</div><div class="prog-bar"><div class="prog-fill" style="width:88%;"></div></div>
+    <div class="tool-sep"></div>
+    <div class="tool-item" onclick="launchMiniGame('monitor')"><span>📡</span><span>INICIAR SCAN ▸</span></div>
+    <div class="tool-item" onclick="showToast('RELATÓRIO GERADO!')"><span>📋</span><span>GERAR RELATÓRIO</span></div>`},
+  tools:{icon:'🔧',title:'FERRAMENTAS',html:`
+    <div class="tool-item" onclick="launchMiniGame('wrench')"><span>🔧</span><span>APERTAR PARAFUSOS ▸</span></div>
+    <div class="tool-item" onclick="showToast('SOLDA SELECIONADA')"><span>🔥</span><span>MAÇARICO</span></div>
+    <div class="tool-item" onclick="showToast('DRILL SELECIONADO')"><span>🔩</span><span>FURADEIRA</span></div>
+    <div class="tool-item" onclick="showToast('MARTELO SELECIONADO')"><span>🔨</span><span>MARTELO PLASMA</span></div>
+    <div class="tool-sep"></div>
+    <div class="tool-item" onclick="showToast('ANALISADOR ATIVO')"><span>📐</span><span>ANALISADOR</span></div>
+    <div class="tool-item" onclick="showToast('CALIBRADOR ATIVO')"><span>⚙️</span><span>CALIBRADOR</span></div>`},
+  pecas:{icon:'📦',title:'PEÇAS',html:`
+    <div class="tool-item" onclick="launchMiniGame('robot')"><span>🤖</span><span>ENCAIXAR PEÇAS ▸</span></div>
+    <div class="tool-item" onclick="showToast('PLACA SELECIONADA')"><span>🔲</span><div><div>PLACA DE TITÂNIO</div><div style="font-size:5.5px;color:var(--green);margin-top:2px;">x4 em estoque</div></div></div>
+    <div class="tool-item" onclick="showToast('MOTOR SELECIONADO')"><span>⚙️</span><div><div>MOTOR ION MK-3</div><div style="font-size:5.5px;color:var(--yellow);margin-top:2px;">x1 em estoque</div></div></div>
+    <div class="tool-item" onclick="showToast('ESCUDO SELECIONADO')"><span>🛡️</span><div><div>GERADOR ESCUDO</div><div style="font-size:5.5px;color:var(--red);margin-top:2px;">SEM ESTOQUE</div></div></div>
+    <div class="tool-sep"></div>
+    <div class="tool-item" onclick="showToast('PEDIDO ENVIADO!')"><span>📤</span><span>ENCOMENDAR PEÇAS</span></div>`},
+  tinta:{icon:'🎨',title:'PROPULSÃO',html:`
+    <div class="tool-item" onclick="launchMiniGame('rocket')"><span>🚀</span><span>CALIBRAR PROPULSORES ▸</span></div>
+    <div class="tool-item" onclick="showToast('AZUL APLICADO')"><span style="color:#42a5f5;">■</span><span>AZUL ESTELAR</span></div>
+    <div class="tool-item" onclick="showToast('LARANJA APLICADO')"><span style="color:#fb6b3c;">■</span><span>LARANJA NEBULA</span></div>
+    <div class="tool-item" onclick="showToast('VERDE APLICADO')"><span style="color:#00e676;">■</span><span>VERDE ALIEN</span></div>
+    <div class="tool-sep"></div>
+    <div class="tool-item" onclick="showToast('VERNIZ APLICADO!')"><span>✨</span><span>VERNIZ ESPACIAL</span></div>`},
+  sys:{icon:'⚡',title:'SISTEMAS',html:`
+    <div class="tool-item" onclick="launchMiniGame('bolt')"><span>⚡</span><span>CONECTAR CABOS ▸</span></div>
+    <div class="tool-item" onclick="showToast('ENERGIA: 88%')"><span>🔋</span><div><div>BATERIA PRINCIPAL</div><div style="font-size:5.5px;color:var(--green);margin-top:2px;">88% CARREGADA</div></div></div>
+    <div class="tool-item" onclick="showToast('SHIELD OFFLINE!')"><span>🛡️</span><div><div>ESCUDOS</div><div style="font-size:5.5px;color:var(--red);margin-top:2px;">OFFLINE</div></div></div>
+    <div class="tool-item" onclick="showToast('NAVCOMP ATIVO')"><span>🧭</span><div><div>NAVCOM</div><div style="font-size:5.5px;color:var(--yellow);margin-top:2px;">CALIBRANDO...</div></div></div>
+    <div class="tool-sep"></div>
+    <div class="tool-item" onclick="showToast('RESETANDO...')"><span>🔄</span><span>RESET SISTEMAS</span></div>`}
 };
 
-// ── SHIP ICON SELECTION ───────────────────────────────
-let selectedIcon = null;
-
-function selectIcon(el, type, event) {
-  // Remove selected de todos
-  document.querySelectorAll('.ship-icon').forEach(i => i.classList.remove('selected','flash'));
-  // Se mesmo clicado novamente → deselect
-  if (selectedIcon === el) { selectedIcon = null; return; }
-  // Aplica selected + flash de entrada
-  el.classList.add('selected');
-  selectedIcon = el;
-  triggerEffect(type, event);
+let currentPanel=null;
+function openPanel(key,btnEl){
+  const panel=document.getElementById('tool-panel'),data=panelData[key];
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  if(currentPanel===key){panel.classList.remove('open');currentPanel=null;return;}
+  if(btnEl)btnEl.classList.add('active');
+  document.getElementById('panel-icon').textContent=data.icon;
+  document.getElementById('panel-title').textContent=data.title;
+  document.getElementById('panel-content').innerHTML=data.html;
+  panel.classList.add('open');currentPanel=key;
 }
 
-// ── OPEN TOOL PANEL ───────────────────────────────────
-let currentPanel = null;
-
-function openPanel(key, btnEl) {
-  const panel = document.getElementById('tool-panel');
-  const data  = panelData[key];
-
-  // Deactivate all sidebar buttons
-  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
-
-  if (currentPanel === key) {
-    // Close if same panel clicked again
-    panel.classList.remove('open');
-    currentPanel = null;
-    return;
-  }
-
-  // Activate pressed button
-  if (btnEl) btnEl.classList.add('active');
-
-  // Fill content
-  document.getElementById('panel-icon').textContent  = data.icon;
-  document.getElementById('panel-title').textContent = data.title;
-  document.getElementById('panel-content').innerHTML = data.html;
-
-  panel.classList.add('open');
-  currentPanel = key;
+// ── ICON SELECTION ─────────────────────────────────
+let selectedIcon=null;
+function selectIcon(el,type,event){
+  document.querySelectorAll('.ship-icon').forEach(i=>i.classList.remove('selected'));
+  if(selectedIcon===el){selectedIcon=null;return;}
+  el.classList.add('selected');selectedIcon=el;
+  triggerEffect(type,event);
 }
 
-// ── TYPEWRITER EFFECT ─────────────────────────────────
-function typewriter(el, html, speed = 38) {
-  const text = html.replace(/<br>/g, '\n');
-  el.textContent = '';
-  let i = 0;
-  const tick = () => {
-    if (i >= text.length) return;
-    const ch = text[i++];
-    if (ch === '\n') el.appendChild(document.createElement('br'));
-    else el.appendChild(document.createTextNode(ch));
-    setTimeout(tick, speed);
-  };
-  tick();
-}
-
-// ── NPC DIALOGUE ROTATION ─────────────────────────────
-const npcLines = [
+// ── NPC ────────────────────────────────────────────
+const npcLines=[
   'ESSA NAVE PRECISA\nDE BASTANTE\nATENÇÃO, CHEFE!',
   'AQUELE MOTOR\nNÃO VAI DURAR\nMUITO TEMPO...',
   'CUIDADO COM OS\nESCUDOS! ESTÃO\nNA BASE.',
@@ -1247,352 +490,410 @@ const npcLines = [
   'PRECISO DE MAIS\nPEÇAS DO\nARMAZÉM.',
   'O CLIENTE ESTÁ\nESPERANDO,\nRÁPIDO!',
 ];
-let npcIdx = 0;
-
-// Inicia com typewriter na primeira fala
-window.addEventListener('DOMContentLoaded', () => {
-  const bubble = document.getElementById('npc-bubble');
-  if (bubble) typewriter(bubble, npcLines[0].replace(/\n/g,'<br>'), 42);
-});
-
-setInterval(() => {
-  npcIdx = (npcIdx + 1) % npcLines.length;
-  const bubble = document.getElementById('npc-bubble');
-  if (bubble) {
-    bubble.style.opacity = '0';
-    bubble.style.transform = 'scale(0.93) translateY(4px)';
-    bubble.style.transition = 'opacity 0.3s, transform 0.3s';
-    setTimeout(() => {
-      bubble.textContent = '';
-      bubble.style.opacity = '1';
-      bubble.style.transform = '';
-      typewriter(bubble, npcLines[npcIdx].replace(/\n/g,'<br>'), 42);
-    }, 320);
-  }
-}, 5000);
-
-// ── DELIVER SHIP ──────────────────────────────────────
-function deliverShip() {
-  // Big effect burst
-  spawnConfetti(window.innerWidth / 2, window.innerHeight / 2);
-  showToast('🚀 NAVE ENTREGUE COM SUCESSO!');
-  setTimeout(() => {
-    document.getElementById('main-prog').style.width = '100%';
-    document.getElementById('main-prog').nextElementSibling;
-    const pctEl = document.querySelector('#screen-workshop .ws-header span[style*="var(--green)"]');
-    if (pctEl) pctEl.textContent = '100%';
-  }, 400);
-}
-
-// ── PAINT APPLY ───────────────────────────────────────
-function applyPaint(color) {
-  showToast('TINTA APLICADA!');
-}
-
-// ── TOAST ─────────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
-}
-
-/* ═══════════════════════════════════════════════════════
-   PARTICLE EFFECTS ENGINE
-═══════════════════════════════════════════════════════ */
-const pfxCanvas = document.getElementById('pfx-canvas');
-const pfxCtx    = pfxCanvas.getContext('2d');
-let particles   = [];
-let pfxRAF      = null;
-
-function resizePfx() {
-  pfxCanvas.width  = window.innerWidth;
-  pfxCanvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizePfx);
-resizePfx();
-
-// Particle classes per effect
-const EFFECTS = {
-  // 🔧 WRENCH — orange spark burst
-  wrench: {
-    color : () => `hsl(${20 + Math.random()*30}, 100%, ${50+Math.random()*30}%)`,
-    count : 28,
-    create: (x,y,i) => ({
-      x, y,
-      vx : (Math.random()-0.5)*9,
-      vy : (Math.random()-0.5)*9 - 3,
-      life: 1, decay: 0.025 + Math.random()*0.02,
-      size: 3 + Math.random()*4,
-      shape: 'square',
-      color: `hsl(${20+Math.random()*30},100%,${50+Math.random()*30}%)`,
-      gravity: 0.18,
-      type: 'spark'
-    }),
-    draw(ctx, p) {
-      ctx.save();
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle   = p.color;
-      ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
-      ctx.restore();
-    }
-  },
-
-  // ⚡ BOLT — yellow electric arcs
-  bolt: {
-    color : () => `hsl(${50+Math.random()*20}, 100%, ${70+Math.random()*20}%)`,
-    count : 20,
-    create: (x,y,i) => ({
-      x, y,
-      angle : (i / 20) * Math.PI * 2,
-      len   : 20 + Math.random()*30,
-      life  : 1, decay: 0.04,
-      color : `hsl(${50+Math.random()*20},100%,${70+Math.random()*20}%)`,
-      width : 1.5 + Math.random()*1.5,
-      type  : 'arc'
-    }),
-    draw(ctx, p) {
-      ctx.save();
-      ctx.globalAlpha = p.life;
-      ctx.strokeStyle = p.color;
-      ctx.lineWidth   = p.width;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur  = 8;
-      const endX = p.x + Math.cos(p.angle) * p.len * (1 - p.life + 1);
-      const endY = p.y + Math.sin(p.angle) * p.len * (1 - p.life + 1);
-      // Zigzag
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      const midX = (p.x + endX)/2 + (Math.random()-0.5)*20;
-      const midY = (p.y + endY)/2 + (Math.random()-0.5)*20;
-      ctx.lineTo(midX, midY);
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-      ctx.restore();
-    }
-  },
-
-  // 🖥️ MONITOR — green scan beam rings
-  monitor: {
-    color : () => `hsl(${140+Math.random()*30}, 100%, ${50+Math.random()*20}%)`,
-    count : 5,
-    create: (x,y,i) => ({
-      x, y,
-      radius: 4 + i * 14,
-      life  : 1, decay: 0.022 + i * 0.008,
-      color : `hsl(${140+Math.random()*30},100%,${50+Math.random()*20}%)`,
-      width : 3 - i * 0.4,
-      type  : 'ring'
-    }),
-    draw(ctx, p) {
-      ctx.save();
-      ctx.globalAlpha = p.life * 0.9;
-      ctx.strokeStyle = p.color;
-      ctx.lineWidth   = Math.max(0.5, p.width * p.life);
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur  = 12;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius * (1.6 - p.life), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-  },
-
-  // 🤖 ROBOT — red gear-spin particles
-  robot: {
-    color : () => `hsl(${0+Math.random()*25}, 90%, ${50+Math.random()*20}%)`,
-    count : 24,
-    create: (x,y,i) => ({
-      x, y,
-      angle : (i/24)*Math.PI*2,
-      speed : 2.5 + Math.random()*3,
-      life  : 1, decay: 0.018 + Math.random()*0.015,
-      color : `hsl(${Math.random()*25},90%,${50+Math.random()*20}%)`,
-      size  : 4 + Math.random()*3,
-      rot   : Math.random()*Math.PI*2,
-      rotSpd: (Math.random()-0.5)*0.3,
-      type  : 'gear'
-    }),
-    draw(ctx, p) {
-      ctx.save();
-      ctx.globalAlpha = p.life;
-      ctx.translate(p.x + Math.cos(p.angle)*p.speed*(1-p.life)*60,
-                    p.y + Math.sin(p.angle)*p.speed*(1-p.life)*60);
-      ctx.rotate(p.rot + p.rotSpd * (1-p.life)*60);
-      ctx.fillStyle   = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur  = 8;
-      // Draw gear-like hex
-      ctx.beginPath();
-      for (let j=0;j<6;j++){
-        const a=j*Math.PI/3;
-        j===0 ? ctx.moveTo(Math.cos(a)*p.size, Math.sin(a)*p.size)
-              : ctx.lineTo(Math.cos(a)*p.size, Math.sin(a)*p.size);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-  },
-
-  // 🚀 ROCKET — blue bubble trail
-  rocket: {
-    color : () => `hsl(${200+Math.random()*40}, 90%, ${60+Math.random()*20}%)`,
-    count : 22,
-    create: (x,y,i) => ({
-      x : x + (Math.random()-0.5)*30,
-      y : y + (Math.random()-0.5)*30,
-      vy: -(1 + Math.random()*4),
-      vx: (Math.random()-0.5)*2.5,
-      life: 1, decay: 0.016 + Math.random()*0.02,
-      color: `hsl(${200+Math.random()*40},90%,${60+Math.random()*20}%)`,
-      r    : 5 + Math.random()*10,
-      type : 'bubble'
-    }),
-    draw(ctx, p) {
-      ctx.save();
-      ctx.globalAlpha = p.life * 0.7;
-      ctx.strokeStyle = p.color;
-      ctx.lineWidth   = 2;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur  = 10;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
-      ctx.stroke();
-      // Inner highlight
-      ctx.globalAlpha = p.life * 0.2;
-      ctx.fillStyle   = p.color;
-      ctx.fill();
-      ctx.restore();
-    }
-  }
+const npcReactions={
+  wrench:['NÃO ESQUEÇA\nNENHUM PARAFUSO\nCHEFE!','APERTEM TUDO!\nNÃO QUERO\nVAZAMENTOS!'],
+  bolt:  ['CONECTA OS\nCABOS CERTOS!\nCUIDADO!','ENERGIA\nFLUINDO\nPERFEITO!'],
+  monitor:['ESCANEIE\nTUDO!\nATÉ O FUNDO!','DANO\nDETECTADO!\nCORRIJA JÁ!'],
+  robot: ['ESSAS PEÇAS\nNÃO MONTAM\nSOZINHAS!','ENCAIXE\nDIREITO\nCHEFE!'],
+  rocket:['TIMING\nÉ TUDO NA\nPROPULSÃO!','CALIBRE\nOS MOTORES\nDIREITO!'],
 };
+let npcIdx=0;
+function typewriter(el,text,speed=38){
+  el.innerHTML='';let i=0;
+  const tick=()=>{if(i>=text.length)return;const ch=text[i++];if(ch==='\n')el.appendChild(document.createElement('br'));else el.appendChild(document.createTextNode(ch));setTimeout(tick,speed);};
+  tick();
+}
+function setNpcLine(text){
+  const b=document.getElementById('npc-bubble');if(!b)return;
+  b.style.opacity='0';b.style.transform='scale(0.93) translateY(4px)';
+  setTimeout(()=>{b.style.opacity='1';b.style.transform='';typewriter(b,text,38);},300);
+}
+window.addEventListener('DOMContentLoaded',()=>setNpcLine(npcLines[0]));
+setInterval(()=>{npcIdx=(npcIdx+1)%npcLines.length;setNpcLine(npcLines[npcIdx]);},5000);
 
-// Map type → draw function (set at particle creation)
-const TYPE_DRAW = {};
-for (const [key, eff] of Object.entries(EFFECTS)) {
-  const sample = eff.create(0, 0, 0);
-  TYPE_DRAW[sample.type] = eff.draw.bind(eff);
+// ── DELIVER ────────────────────────────────────────
+function deliverShip(){
+  spawnConfetti(innerWidth/2,innerHeight/2);
+  showToast('🚀 NAVE ENTREGUE COM SUCESSO!');
+  setTimeout(()=>{addProgress('_deliver',0);const fill=document.getElementById('main-prog');if(fill)fill.style.width='100%';document.getElementById('main-pct').textContent='100%';},400);
 }
 
-function triggerEffect(type, event) {
-  const x = event.clientX;
-  const y = event.clientY;
-  const def = EFFECTS[type];
-  if (!def) return;
+// ── TOAST ──────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 
-  for (let i = 0; i < def.count; i++) {
-    particles.push(def.create(x, y, i));
-  }
+/* ═══════════════════════════════════════════════════
+   MINI-GAME ENGINE
+═══════════════════════════════════════════════════ */
+let mgTimer=null,mgCleanup=null;
 
-  if (!pfxRAF) pfxLoop();
+function launchMiniGame(type){
+  clearMgTimer();
+  const overlay=document.getElementById('mg-overlay');
+  const arena  =document.getElementById('mg-arena');
+  const result =document.getElementById('mg-result');
+  arena.style.display='flex';arena.style.flexDirection='column';
+  result.style.display='none';
+  document.getElementById('mg-score-fill').style.width='0%';
+  overlay.classList.add('open');
+
+  // NPC reaction
+  const reactions=npcReactions[type]||npcLines;
+  setNpcLine(reactions[Math.floor(Math.random()*reactions.length)]);
+
+  const games={wrench:mgWrench,bolt:mgBolt,monitor:mgMonitor,robot:mgRobot,rocket:mgRocket};
+  if(games[type]) games[type](arena,type);
 }
 
-function pfxLoop() {
-  pfxCtx.clearRect(0, 0, pfxCanvas.width, pfxCanvas.height);
+function closeMiniGame(){
+  clearMgTimer();
+  if(mgCleanup) mgCleanup();
+  document.getElementById('mg-overlay').classList.remove('open');
+  document.getElementById('mg-arena').innerHTML='';
+}
 
-  particles = particles.filter(p => {
-    p.life -= p.decay;
-    if (p.life <= 0) return false;
+function clearMgTimer(){if(mgTimer){clearInterval(mgTimer);mgTimer=null;}}
 
-    // Physics
-    if (p.type === 'spark') {
-      p.x  += p.vx;
-      p.y  += p.vy;
-      p.vy += p.gravity;
-    } else if (p.type === 'gear') {
-      p.y  += p.vy;
-      p.x  += p.vx;
-      p.vy += p.gravity;
-    } else if (p.type === 'bubble') {
-      p.x  += p.vx;
-      p.y  += p.vy;
-    }
-    // arc & ring: position is static, drawn relative to origin
+function showMgResult(type,score){
+  const pct=Math.round(score*100);
+  addProgress(type,pct);
+  const arena=document.getElementById('mg-arena');
+  const result=document.getElementById('mg-result');
+  arena.style.display='none';
+  result.style.display='flex';
+  const titles=['FALHOU!','FRACO...','BOM TRABALHO!','EXCELENTE!','PERFEITO!!'];
+  const idx=pct<20?0:pct<40?1:pct<65?2:pct<90?3:4;
+  const colors=['#f44336','#ff9060','#f5c518','#00e676','#00f5ff'];
+  document.getElementById('res-title').textContent=titles[idx];
+  document.getElementById('res-title').style.color=colors[idx];
+  document.getElementById('res-sub').textContent=`SISTEMA REPARADO: ${pct}%\nPROGRESSO GLOBAL: ${progress}%`;
+  spawnConfetti(document.getElementById('mg-box').getBoundingClientRect().left+300,
+                document.getElementById('mg-box').getBoundingClientRect().top+100,pct>60);
+}
 
-    const drawFn = TYPE_DRAW[p.type];
-    if (drawFn) drawFn(pfxCtx, p);
-    return true;
+function setMgTimer(label,secs,onEnd){
+  document.getElementById('mg-label').textContent=label;
+  let t=secs;
+  document.getElementById('mg-timer').textContent=t+'s';
+  mgTimer=setInterval(()=>{
+    t--;document.getElementById('mg-timer').textContent=t+'s';
+    document.getElementById('mg-timer').style.color=t<=5?'var(--red)':'var(--cyan)';
+    if(t<=0){clearMgTimer();onEnd();}
+  },1000);
+}
+
+/* ─────────────────────────────────────────────────
+   MINI-GAME 1: APERTAR PARAFUSOS (wrench)
+   Clique nos parafusos giratórios antes do tempo
+───────────────────────────────────────────────── */
+function mgWrench(arena,type){
+  document.getElementById('mg-title').textContent='⚙ APERTAR PARAFUSOS';
+  const total=8;let done=0;
+  arena.innerHTML='<div class="bolt-grid" id="bolt-grid"></div>';
+  const grid=document.getElementById('bolt-grid');
+  const bolts=['🔩','⚙️','🔧','🔩','⚙️','🔩','🔧','⚙️'];
+  bolts.forEach((icon,i)=>{
+    const el=document.createElement('div');
+    el.className='bolt-item spinning';
+    el.textContent=icon;
+    el.onclick=()=>{
+      if(el.classList.contains('done'))return;
+      el.classList.remove('spinning');el.classList.add('done');
+      el.textContent='✓';done++;
+      const pct=done/total;
+      document.getElementById('mg-score-fill').style.width=(pct*100)+'%';
+      if(done===total){clearMgTimer();setTimeout(()=>showMgResult(type,1),300);}
+    };
+    grid.appendChild(el);
+  });
+  setMgTimer('APERTE OS PARAFUSOS',15,()=>showMgResult(type,done/total));
+}
+
+/* ─────────────────────────────────────────────────
+   MINI-GAME 2: CONECTAR CABOS (bolt/energia)
+   Conecte os cabos coloridos da esq com a dir
+───────────────────────────────────────────────── */
+function mgBolt(arena,type){
+  document.getElementById('mg-title').textContent='⚡ CONECTAR CABOS';
+  const colors=[
+    {name:'ALPHA', color:'#00f5ff', bg:'rgba(0,245,255,0.15)'},
+    {name:'BETA',  color:'#f5c518', bg:'rgba(245,197,24,0.15)'},
+    {name:'GAMMA', color:'#f44336', bg:'rgba(244,67,54,0.15)'},
+    {name:'DELTA', color:'#00e676', bg:'rgba(0,230,118,0.15)'},
+  ];
+  const shuffled=[...colors].sort(()=>Math.random()-0.5);
+  let selected=null,correct=0;
+
+  arena.innerHTML=`
+    <div style="position:relative;width:100%;height:240px;">
+      <canvas class="wire-canvas" id="wire-cv" width="600" height="240"></canvas>
+      <div class="wire-grid" style="position:absolute;inset:0;display:flex;justify-content:space-between;padding:10px 20px;">
+        <div class="wire-col" id="left-col"></div>
+        <div class="wire-col" id="right-col"></div>
+      </div>
+    </div>`;
+
+  const lc=document.getElementById('left-col');
+  const rc=document.getElementById('right-col');
+  const cv=document.getElementById('wire-cv');
+  const ctx=cv.getContext('2d');
+  const connections=[];
+
+  colors.forEach(c=>{
+    const n=document.createElement('div');
+    n.className='wire-node';n.dataset.key=c.name;n.dataset.side='left';
+    n.style.cssText=`border-color:${c.color};color:${c.color};background:${c.bg};`;
+    n.textContent=c.name;n.onclick=()=>selectNode(n,c.color,c.name,'left');
+    lc.appendChild(n);
+  });
+  shuffled.forEach(c=>{
+    const n=document.createElement('div');
+    n.className='wire-node';n.dataset.key=c.name;n.dataset.side='right';
+    n.style.cssText=`border-color:${c.color};color:${c.color};background:${c.bg};`;
+    n.textContent=c.name;n.onclick=()=>selectNode(n,c.color,c.name,'right');
+    rc.appendChild(n);
   });
 
-  if (particles.length > 0) {
-    pfxRAF = requestAnimationFrame(pfxLoop);
-  } else {
-    pfxRAF = null;
-  }
-}
-
-// ── CONFETTI for ENTREGAR NAVE ────────────────────────
-function spawnConfetti(cx, cy) {
-  const colors = ['#fb6b3c','#f5c518','#00e676','#f44336','#42a5f5','#ce93d8','#fff'];
-  for (let i = 0; i < 80; i++) {
-    const col = colors[Math.floor(Math.random()*colors.length)];
-    particles.push({
-      x  : cx + (Math.random()-0.5)*200,
-      y  : cy,
-      vx : (Math.random()-0.5)*12,
-      vy : -(4 + Math.random()*10),
-      life  : 1,
-      decay : 0.008 + Math.random()*0.012,
-      color : col,
-      size  : 6 + Math.random()*8,
-      rot   : Math.random()*Math.PI*2,
-      rotSpd: (Math.random()-0.5)*0.2,
-      gravity: 0.22,
-      type  : 'gear'
+  function drawWires(){
+    ctx.clearRect(0,0,600,240);
+    connections.forEach(con=>{
+      ctx.beginPath();ctx.moveTo(con.x1,con.y1);ctx.lineTo(con.x2,con.y2);
+      ctx.strokeStyle=con.color;ctx.lineWidth=3;ctx.shadowColor=con.color;ctx.shadowBlur=8;ctx.stroke();
     });
   }
-  if (!pfxRAF) pfxLoop();
-}
 
-// ── PIXEL ART IMAGE FALLBACK ──────────────────────────
-// If bg1/bg2 don't exist, apply CSS gradient backgrounds
-(function checkBgs() {
-  const testImg = new Image();
-  testImg.onload = () => { /* real image loaded, nothing to do */ };
-  testImg.onerror = () => {
-    // Fallback gradients when images are not in web-assets/
-    document.getElementById('bg-menu').style.backgroundImage =
-      'radial-gradient(ellipse at 35% 55%, #1a2848 0%, #0a0e1c 40%, #050810 100%), url(\'\')';
-    document.getElementById('bg-workshop').style.backgroundImage =
-      'radial-gradient(ellipse at 55% 55%, #141a2e 0%, #0a0e1a 40%, #04070f 100%), url(\'\')';
-    // Also show a helpful overlay so user knows
-    const hint = document.createElement('div');
-    hint.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99998;background:rgba(5,8,20,0.92);border:2px solid rgba(251,107,60,0.5);padding:24px 32px;font-family:monospace;font-size:11px;color:#9ac8f0;text-align:center;line-height:2;letter-spacing:1px;box-shadow:4px 4px 0 rgba(0,0,0,0.8);';
-    hint.innerHTML = '<span style="color:#fb6b3c;font-size:13px;">⚠ IMAGENS NÃO ENCONTRADAS</span><br><br>Salve as imagens em:<br><span style="color:#f5c518;">StellarFix/web-assets/bg1.jpg<br>StellarFix/web-assets/bg2.jpg<br>StellarFix/web-assets/npc.png</span><br><br><button onclick="this.parentElement.remove()" style="font-family:monospace;font-size:10px;background:rgba(251,107,60,0.2);border:2px solid #fb6b3c;color:#fb6b3c;padding:6px 18px;cursor:pointer;letter-spacing:1px;">CONTINUAR SEM IMAGENS</button>';
-    document.body.appendChild(hint);
-  };
-  testImg.src = 'web-assets/bg1.jpg';
-})();
-
-// ── KEYBOARD SHORTCUTS ────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    const panel = document.getElementById('tool-panel');
-    if (panel.classList.contains('open')) {
-      panel.classList.remove('open');
-      document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('active'));
-      currentPanel = null;
+  function selectNode(n,color,key,side){
+    if(n.classList.contains('connected'))return;
+    if(!selected){selected={el:n,color,key,side};n.classList.add('selected');return;}
+    if(selected.side===side){selected.el.classList.remove('selected');selected={el:n,color,key,side};n.classList.add('selected');return;}
+    if(selected.key===key){
+      // Correct match
+      const r1=selected.el.getBoundingClientRect(),r2=n.getBoundingClientRect(),rc2=cv.getBoundingClientRect();
+      const x1=r1.left-rc2.left+(selected.side==='left'?r1.width:0),y1=r1.top-rc2.top+r1.height/2;
+      const x2=r2.left-rc2.left+(side==='left'?r2.width:0),y2=r2.top-rc2.top+r2.height/2;
+      connections.push({x1,y1,x2,y2,color});drawWires();
+      selected.el.classList.remove('selected');selected.el.classList.add('connected');
+      n.classList.add('connected');correct++;selected=null;
+      document.getElementById('mg-score-fill').style.width=(correct/colors.length*100)+'%';
+      if(correct===colors.length){clearMgTimer();setTimeout(()=>showMgResult(type,1),400);}
+    } else {
+      // Wrong
+      selected.el.classList.remove('selected');n.style.animation='shake 0.3s';
+      setTimeout(()=>n.style.animation='',300);selected=null;
     }
   }
-  if (e.key === '1') openPanel('scan',  document.getElementById('sb-scan'));
-  if (e.key === '2') openPanel('tools', document.getElementById('sb-tools'));
-  if (e.key === '3') openPanel('pecas', document.getElementById('sb-pecas'));
-  if (e.key === '4') openPanel('tinta', document.getElementById('sb-tinta'));
-  if (e.key === '5') openPanel('sys',   document.getElementById('sb-sys'));
-  // Tecla D = debug: mostra/oculta zonas de clique
-  if (e.key === 'd' || e.key === 'D') {
-    document.querySelectorAll('.ship-icon').forEach(el => {
-      el.style.background = el.style.background ? '' : 'rgba(255,0,0,0.35)';
-      el.style.border = el.style.border ? '' : '2px solid red';
-    });
+  setMgTimer('CONECTE OS CABOS',20,()=>showMgResult(type,correct/colors.length));
+}
+
+/* ─────────────────────────────────────────────────
+   MINI-GAME 3: SCAN DA NAVE (monitor)
+   Clique nas células danificadas para reparar
+───────────────────────────────────────────────── */
+function mgMonitor(arena,type){
+  document.getElementById('mg-title').textContent='🖥 SCAN DA NAVE';
+  const rows=4,cols=8,total=rows*cols;
+  const damaged=new Set();
+  while(damaged.size<10) damaged.add(Math.floor(Math.random()*total));
+  let repaired=0;
+  arena.innerHTML='<div class="scan-grid" id="scan-grid"></div>';
+  const grid=document.getElementById('scan-grid');
+  for(let i=0;i<total;i++){
+    const el=document.createElement('div');
+    el.className='scan-cell'+(damaged.has(i)?' damaged':'');
+    el.dataset.idx=i;
+    el.onclick=()=>{
+      if(el.classList.contains('scanned'))return;
+      if(damaged.has(i)){
+        el.classList.remove('damaged');el.classList.add('scanned');el.textContent='✓';
+        repaired++;
+        document.getElementById('mg-score-fill').style.width=(repaired/damaged.size*100)+'%';
+        if(repaired===damaged.size){clearMgTimer();setTimeout(()=>showMgResult(type,1),300);}
+      } else {
+        el.style.background='rgba(255,255,255,0.06)';el.style.borderColor='rgba(255,255,255,0.15)';
+      }
+    };
+    grid.appendChild(el);
   }
+  setMgTimer('REPARE OS DANOS',18,()=>showMgResult(type,repaired/damaged.size));
+}
+
+/* ─────────────────────────────────────────────────
+   MINI-GAME 4: ENCAIXAR PEÇAS (robot)
+   Selecione a peça e encaixe no slot correto
+───────────────────────────────────────────────── */
+function mgRobot(arena,type){
+  document.getElementById('mg-title').textContent='🤖 ENCAIXAR PEÇAS';
+  const pieces=[
+    {id:'ESCUDO',    icon:'🛡️', desc:'GERADOR ESCUDO'},
+    {id:'MOTOR',     icon:'⚙️', desc:'MOTOR ION MK-3'},
+    {id:'PLACA',     icon:'🔲', desc:'PLACA TITÂNIO'},
+    {id:'CABO',      icon:'🔌', desc:'CABO PLASMA'},
+  ];
+  const slots=pieces.map(p=>({...p})).sort(()=>Math.random()-0.5);
+  const tray =pieces.map(p=>({...p})).sort(()=>Math.random()-0.5);
+  let selected=null,correct=0;
+
+  arena.innerHTML=`<div class="piece-arena">
+    <div class="piece-slots" id="p-slots"></div>
+    <div style="width:2px;background:rgba(255,255,255,0.08);"></div>
+    <div class="piece-tray" id="p-tray"></div>
+  </div>`;
+
+  const slotEl=document.getElementById('p-slots');
+  const trayEl=document.getElementById('p-tray');
+
+  slots.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='piece-slot';el.dataset.id=s.id;
+    el.innerHTML=`<span style="font-size:18px;opacity:0.3;">▣</span><span>${s.desc}</span>`;
+    el.onclick=()=>{
+      if(!selected||el.classList.contains('filled'))return;
+      if(selected.dataset.id===s.id){
+        el.innerHTML=`<span style="font-size:18px;">${s.icon}</span><span style="color:var(--green)">${s.desc} ✓</span>`;
+        el.classList.add('filled');
+        document.querySelector(`.piece-card[data-id="${s.id}"]`).classList.add('used');
+        correct++;document.getElementById('mg-score-fill').style.width=(correct/pieces.length*100)+'%';
+        selected=null;document.querySelectorAll('.piece-card').forEach(c=>c.classList.remove('selected'));
+        if(correct===pieces.length){clearMgTimer();setTimeout(()=>showMgResult(type,1),300);}
+      } else {
+        el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),400);
+        showToast('PEÇA ERRADA!');
+      }
+    };
+    slotEl.appendChild(el);
+  });
+
+  tray.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='piece-card';el.dataset.id=p.id;
+    el.innerHTML=`<span style="font-size:18px;">${p.icon}</span><span>${p.desc}</span>`;
+    el.onclick=()=>{
+      if(el.classList.contains('used'))return;
+      document.querySelectorAll('.piece-card').forEach(c=>c.classList.remove('selected'));
+      if(selected===el){selected=null;return;}
+      el.classList.add('selected');selected=el;
+    };
+    trayEl.appendChild(el);
+  });
+
+  setMgTimer('ENCAIXE AS PEÇAS',25,()=>showMgResult(type,correct/pieces.length));
+}
+
+/* ─────────────────────────────────────────────────
+   MINI-GAME 5: CALIBRAR PROPULSORES (rocket)
+   Clique LOCK quando a barra estiver na zona verde
+───────────────────────────────────────────────── */
+function mgRocket(arena,type){
+  document.getElementById('mg-title').textContent='🚀 CALIBRAR PROPULSORES';
+  const thrusters=['DIANTEIRO','CENTRAL','TRASEIRO'];
+  const states=thrusters.map(()=>({pos:Math.random(),speed:0.008+Math.random()*0.012,dir:1,locked:false,ok:false}));
+  const zoneStart=0.35,zoneEnd=0.65;
+  let rafId;
+
+  arena.innerHTML=`<div class="thruster-arena">${thrusters.map((t,i)=>`
+    <div class="thruster-row">
+      <div class="thruster-label">${t}</div>
+      <div class="thruster-track">
+        <div class="thruster-zone" style="left:${zoneStart*100}%;width:${(zoneEnd-zoneStart)*100}%;"></div>
+        <div class="thruster-bar" id="tbar-${i}" style="left:0%;"></div>
+      </div>
+      <button class="thruster-lock" id="tlock-${i}" onclick="thrusterLock(${i})">LOCK</button>
+    </div>`).join('')}</div>`;
+
+  window.thrusterLock=(i)=>{
+    if(states[i].locked)return;
+    states[i].locked=true;
+    const el=document.getElementById('tlock-'+i);
+    if(states[i].pos>=zoneStart&&states[i].pos<=zoneEnd){
+      states[i].ok=true;el.classList.add('ok');el.textContent='✓ OK';
+    } else {
+      el.classList.add('miss');el.textContent='✗ MISS';
+      setTimeout(()=>{states[i].locked=false;el.classList.remove('miss');el.textContent='LOCK';},800);
+    }
+    const ok=states.filter(s=>s.ok).length;
+    document.getElementById('mg-score-fill').style.width=(ok/thrusters.length*100)+'%';
+    if(ok===thrusters.length){cancelAnimationFrame(rafId);clearMgTimer();setTimeout(()=>showMgResult(type,1),300);}
+  };
+
+  function animate(){
+    states.forEach((s,i)=>{
+      if(s.locked&&s.ok)return;
+      s.pos+=s.speed*s.dir;
+      if(s.pos>=1){s.pos=1;s.dir=-1;}
+      if(s.pos<=0){s.pos=0;s.dir=1;}
+      const bar=document.getElementById('tbar-'+i);
+      if(bar)bar.style.left=(s.pos*90)+'%';
+    });
+    rafId=requestAnimationFrame(animate);
+  }
+  animate();
+  mgCleanup=()=>{cancelAnimationFrame(rafId);window.thrusterLock=null;};
+  setMgTimer('CALIBRE OS PROPULSORES',20,()=>{cancelAnimationFrame(rafId);const ok=states.filter(s=>s.ok).length;showMgResult(type,ok/thrusters.length);});
+}
+
+/* ═══════════════════════════════════════════════════
+   PARTICLE EFFECTS
+═══════════════════════════════════════════════════ */
+const pfxCanvas=document.getElementById('pfx-canvas');
+const pfxCtx=pfxCanvas.getContext('2d');
+let particles=[],pfxRAF=null;
+function resizePfx(){pfxCanvas.width=innerWidth;pfxCanvas.height=innerHeight;}
+addEventListener('resize',resizePfx);resizePfx();
+
+const EFFECTS={
+  wrench:{count:28,create:(x,y,i)=>({x,y,vx:(Math.random()-0.5)*9,vy:(Math.random()-0.5)*9-3,life:1,decay:0.025+Math.random()*0.02,size:3+Math.random()*4,color:`hsl(${20+Math.random()*30},100%,${50+Math.random()*30}%)`,gravity:0.18,type:'spark'}),draw(ctx,p){ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);ctx.restore();}},
+  bolt:{count:20,create:(x,y,i)=>({x,y,angle:(i/20)*Math.PI*2,len:20+Math.random()*30,life:1,decay:0.04,color:`hsl(${50+Math.random()*20},100%,${70+Math.random()*20}%)`,width:1.5+Math.random()*1.5,type:'arc'}),draw(ctx,p){ctx.save();ctx.globalAlpha=p.life;ctx.strokeStyle=p.color;ctx.lineWidth=p.width;ctx.shadowColor=p.color;ctx.shadowBlur=8;const ex=p.x+Math.cos(p.angle)*p.len*(1-p.life+1),ey=p.y+Math.sin(p.angle)*p.len*(1-p.life+1);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo((p.x+ex)/2+(Math.random()-0.5)*20,(p.y+ey)/2+(Math.random()-0.5)*20);ctx.lineTo(ex,ey);ctx.stroke();ctx.restore();}},
+  monitor:{count:5,create:(x,y,i)=>({x,y,radius:4+i*14,life:1,decay:0.022+i*0.008,color:`hsl(${140+Math.random()*30},100%,${50+Math.random()*20}%)`,width:3-i*0.4,type:'ring'}),draw(ctx,p){ctx.save();ctx.globalAlpha=p.life*0.9;ctx.strokeStyle=p.color;ctx.lineWidth=Math.max(0.5,p.width*p.life);ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(p.x,p.y,p.radius*(1.6-p.life),0,Math.PI*2);ctx.stroke();ctx.restore();}},
+  robot:{count:24,create:(x,y,i)=>({x,y,angle:(i/24)*Math.PI*2,speed:2.5+Math.random()*3,life:1,decay:0.018+Math.random()*0.015,color:`hsl(${Math.random()*25},90%,${50+Math.random()*20}%)`,size:4+Math.random()*3,rot:Math.random()*Math.PI*2,rotSpd:(Math.random()-0.5)*0.3,type:'gear'}),draw(ctx,p){ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x+Math.cos(p.angle)*p.speed*(1-p.life)*60,p.y+Math.sin(p.angle)*p.speed*(1-p.life)*60);ctx.rotate(p.rot+p.rotSpd*(1-p.life)*60);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();for(let j=0;j<6;j++){const a=j*Math.PI/3;j===0?ctx.moveTo(Math.cos(a)*p.size,Math.sin(a)*p.size):ctx.lineTo(Math.cos(a)*p.size,Math.sin(a)*p.size);}ctx.closePath();ctx.fill();ctx.restore();}},
+  rocket:{count:22,create:(x,y,i)=>({x:x+(Math.random()-0.5)*30,y:y+(Math.random()-0.5)*30,vy:-(1+Math.random()*4),vx:(Math.random()-0.5)*2.5,life:1,decay:0.016+Math.random()*0.02,color:`hsl(${200+Math.random()*40},90%,${60+Math.random()*20}%)`,r:5+Math.random()*10,type:'bubble'}),draw(ctx,p){ctx.save();ctx.globalAlpha=p.life*0.7;ctx.strokeStyle=p.color;ctx.lineWidth=2;ctx.shadowColor=p.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=p.life*0.2;ctx.fillStyle=p.color;ctx.fill();ctx.restore();}},
+};
+
+const TYPE_DRAW={};
+for(const[key,eff]of Object.entries(EFFECTS)){TYPE_DRAW[eff.create(0,0,0).type]=eff.draw.bind(eff);}
+
+function triggerEffect(type,event){
+  const x=event.clientX,y=event.clientY,def=EFFECTS[type];if(!def)return;
+  for(let i=0;i<def.count;i++)particles.push(def.create(x,y,i));
+  if(!pfxRAF)pfxLoop();
+}
+function pfxLoop(){
+  pfxCtx.clearRect(0,0,pfxCanvas.width,pfxCanvas.height);
+  particles=particles.filter(p=>{
+    p.life-=p.decay;if(p.life<=0)return false;
+    if(p.type==='spark'){p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;}
+    else if(p.type==='gear'){p.y+=p.vy||0;p.x+=p.vx||0;p.vy=(p.vy||0)+0.18;}
+    else if(p.type==='bubble'){p.x+=p.vx;p.y+=p.vy;}
+    const d=TYPE_DRAW[p.type];if(d)d(pfxCtx,p);return true;
+  });
+  if(particles.length>0)pfxRAF=requestAnimationFrame(pfxLoop);else pfxRAF=null;
+}
+
+function spawnConfetti(cx,cy,big=false){
+  const colors=['#fb6b3c','#f5c518','#00e676','#f44336','#42a5f5','#ce93d8','#fff'];
+  const n=big?120:40;
+  for(let i=0;i<n;i++){const col=colors[Math.floor(Math.random()*colors.length)];particles.push({x:cx+(Math.random()-0.5)*200,y:cy,vx:(Math.random()-0.5)*12,vy:-(4+Math.random()*10),life:1,decay:0.008+Math.random()*0.012,color:col,size:6+Math.random()*8,rot:Math.random()*Math.PI*2,rotSpd:(Math.random()-0.5)*0.2,gravity:0.22,type:'gear'});}
+  if(!pfxRAF)pfxLoop();
+}
+
+// ── KEYBOARD ──────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('mg-overlay').classList.contains('open')){closeMiniGame();return;}
+    const p=document.getElementById('tool-panel');if(p.classList.contains('open')){p.classList.remove('open');document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));currentPanel=null;}
+  }
+  if(e.key==='1')openPanel('scan', document.getElementById('sb-scan'));
+  if(e.key==='2')openPanel('tools',document.getElementById('sb-tools'));
+  if(e.key==='3')openPanel('pecas',document.getElementById('sb-pecas'));
+  if(e.key==='4')openPanel('tinta',document.getElementById('sb-tinta'));
+  if(e.key==='5')openPanel('sys',  document.getElementById('sb-sys'));
+  if(e.key==='d'||e.key==='D')document.querySelectorAll('.ship-icon').forEach(el=>{el.style.background=el.style.background?'':'rgba(255,0,0,0.3)';el.style.border=el.style.border?'':'2px solid red';});
 });
 
-console.log('%c STELLAR FIX v0.1.0 ', 'background:#fb6b3c;color:#fff;font-family:monospace;font-size:14px;padding:4px 8px;');
-console.log('%c Keys: 1-5 = panels | ESC = close panel ', 'color:#42a5f5;font-family:monospace;');
+// ── IMAGE FALLBACK ─────────────────────────────────
+(function(){const t=new Image();t.onerror=()=>{document.getElementById('bg-menu').style.backgroundImage='radial-gradient(ellipse at 35% 55%,#1a2848 0%,#0a0e1c 40%,#050810 100%)';document.getElementById('bg-workshop').style.backgroundImage='radial-gradient(ellipse at 55% 55%,#141a2e 0%,#0a0e1a 40%,#04070f 100%)';};t.src='web-assets/bg1.jpg';})();
+
+console.log('%c STELLAR FIX v0.2.0 ','background:#fb6b3c;color:#fff;font-family:monospace;font-size:14px;padding:4px 8px;');
+console.log('%c Keys: 1-5 panels | ESC close | D debug zones ','color:#42a5f5;font-family:monospace;');
 </script>
 </body>
 </html>
